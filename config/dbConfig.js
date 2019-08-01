@@ -1,6 +1,6 @@
 module.exports = {
-    url:
-        'mongodb+srv://admin:admin123@testbase-vkerf.azure.mongodb.net/test?retryWrites=true&w=majority',
+    url: "mongodb+srv://AdminBazy:ZAQwsx12@softserve-oyk4k.azure.mongodb.net/CallbackCats?retryWrites=true&w=majority",
+
     options: {
         useNewUrlParser: true
     }
