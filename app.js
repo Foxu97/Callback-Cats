@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const config = require('./config/dbConfig');
 
 const { Strategy, ExtractJwt } = require('passport-jwt');
 
@@ -13,6 +14,6 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 
 mongoose
-    .connect(config.database.url, config.database.options)
-    .then(() => app.listen(config.server.port))
+    .connect(config.url, config.options)
+    .then(() => app.listen(9092))
     .catch(err => console.log(err));
