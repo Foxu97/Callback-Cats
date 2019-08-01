@@ -5,13 +5,12 @@ const passport = require('passport');
 const config = require('./config/dbConfig');
 
 const { Strategy, ExtractJwt } = require('passport-jwt');
-
+const userRouter = require('./routes/user');
 
 const app = express();
 app.use(bodyParser.json());
-
-
 app.use(passport.initialize());
+app.use('/user', userRouter);
 
 mongoose
     .connect(config.url, config.options)
