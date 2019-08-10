@@ -1,22 +1,13 @@
 const validator = require('validator');
+const { validationResult } = require('express-validator');
+const User = require('../models/user');
 
 exports.postRegisterUser = (req, res, next) => {
-    let { email, password, gender, birthdate } = req.body;
-    email = validator.trim(email);
-    if (!email || !password || !gender || !birthdate) {
-        return res.status(400).send('send all required data');
+    // let { email, password, gender, birthdate } = req.body;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).send(errors);
     }
-    if (!validator.isEmail(email)) {
-        return res.status(400).send('wrong email');
-    }
-    if (!validator.matches(req.body.password, /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#%*?&])[A-Za-z\d@$!#%*?&]{8,}$/)) {
-        return res.status(400).send('wrong password');
-    }
-    if (!(gender.toLowerCase() === 'male' || gender.toLowerCase() === 'female')) {
-        return res.status(400).send('wrong gender');
-    }
-    if (!Date.parse(birthdate)) {
-        return res.status(400).send('wrong date');
-    }
+    //console.log(User.findByEmail('asd@gmail.com'));
     res.status(200).send('git');
 };
