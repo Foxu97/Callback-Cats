@@ -23,6 +23,14 @@ const userSchema = new Schema({
         enum: ['admin', 'moderator', 'user'],
         default: 'user'
     },
+    activationGUID: {
+        type: String,
+        required: false
+    },
+    active: {
+        type: Boolean,
+        default: false
+    },
     bio: {
         type: String
     },
