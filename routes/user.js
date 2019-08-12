@@ -19,6 +19,10 @@ router.post('/register', [
     body('birthdate').isISO8601().withMessage('Please provide a proper date in the ISO8601 format')
 ], userController.postRegisterUser);
 
+router.post('/signin', userController.postUserSignIn);
+
 router.get('/activation/:activationGUID', userController.getAccountActivation);
+
+
 
 module.exports = router;
