@@ -16,8 +16,8 @@ exports.postRegisterUser = (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(422).send(errors);
     }
-    bcrypt.genSalt(saltRounds, function(err, salt) {
-        bcrypt.hash(req.body.password, salt, function(err, hash) {
+    bcrypt.genSalt(saltRounds, function (err, salt) {
+        bcrypt.hash(req.body.password, salt, function (err, hash) {
             req.body.password = hash;
             req.body.activationGUID = uuidv1();
             User.create(req.body);
@@ -27,53 +27,90 @@ exports.postRegisterUser = (req, res, next) => {
                 from: 'helloworld199797@gmail.com',
                 subject: 'Callback Cats activation link',
                 text: activationLink,
-              };
-              sgMail.send(msg);
+            };
+            sgMail.send(msg);
             res.status(200).send('User created successful');
         });
     });
 };
 
-exports.getAccountActivation = (req, res, next) => { 
-    User.findOne({activationGUID: req.params.activationGUID})
-    .then(fetchedUser => {
-        fetchedUser.activationGUID = null;
-        fetchedUser.active = true;
-        fetchedUser.save();
-        res.status(200).send("Account is active");
-    })
-    .catch(err => {
-        res.status(400).send("Something went wrong");
-    })
-}
-
-exports.postUserSignIn = (req, res, next) => { 
-    let user;
-    User.findOne({email: req.body.email})
-    .then(fetchedUser => { 
-        if(!fetchedUser){
-            return res.status(401).send("No user found");
-        }
-        if(!fetchedUser.active){
-            return res.status(401).send("Account is not active");
-        }
-        user = fetchedUser;
-        return bcrypt.compare(req.body.password, fetchedUser.password);
-    })
-    .then(result => {
-        if(!result) {
-            return res.status(401).send("Auth failed");
-        }
-        const token  = jwt.sign({
-            email: user.email
-        }, "secret_string", {expiresIn: "1h"});
-        res.status(200).json({
-            token: token,
-            expiresIn: 3600
+exports.getAccountActivation = (req, res, next) => {
+    User.findOne({ activationGUID: req.params.activationGUID })
+        .then(fetchedUser => {
+            fetchedUser.activationGUID = null;
+            fetchedUser.active = true;
+            fetchedUser.save();
+            res.status(200).send("Account is active");
+        })
+        .catch(err => {
+            res.status(400).send("Something went wrong");
         });
+};
+
+exports.postUserSignIn = (req, res, next) => {
+    let user;
+    User.findOne({ email: req.body.email })
+        .then(fetchedUser => {
+            if (!fetchedUser) {
+                return res.status(401).send("No user found");
+            }
+            if (!fetchedUser.active) {
+                return res.status(401).send("Account is not active");
+            }
+            user = fetchedUser;
+            return bcrypt.compare(req.body.password, fetchedUser.password);
+        })
+        .then(result => {
+            if (!result) {
+                return res.status(401).send("Auth failed");
+            }
+            const token = jwt.sign({
+                email: user.email
+            }, "secret_string", { expiresIn: "1h" });
+            res.status(200).json({
+                token: token,
+                expiresIn: 3600
+            });
+        })
+        .catch(err => {
+            console.log(err);
+            return res.status(401).send("Something went wrong");
+        });
+};
+
+exports.postForgotPassword = (req, res, next) => {
+    const { email } = req.body;
+    User.findByEmail(email).then(user => {
+        user.resetGUID = uuidv1();
+        user.save();
+        let resetLink = 'http://localhost:9092/user/reset/' + user.resetGUID;
+        const msg = {
+            to: email,
+            from: 'helloworld199797@gmail.com',
+            subject: 'Callback Cats password reset link',
+            text: resetLink,
+        };
+        sgMail.send(msg);
+        res.status(200).send('Password reset link has been sent on provided mail');
     })
-    .catch(err => {
-        console.log(err)
-        return res.status(401).send("Something went wrong");
-    })
-}
+        .catch(err => {
+            console.log(err);
+            res.status(200).send('Password reset link has been sent on provided mail.');
+        });
+};
+
+exports.postResetPassword = (req, res, next) => {
+    const { password } = req.body;
+    User.findOne({ resetGUID: req.params.resetGUID })
+        .then(user => {
+            user.password = password;
+            //dodac haszowanie hasla
+            user.resetGUID = undefined;
+            user.save();
+            res.status(200).send('Password has been changed');
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(401).send('Something went wrong');
+        });
+};

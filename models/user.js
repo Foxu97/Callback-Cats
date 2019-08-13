@@ -31,6 +31,14 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
+    resetGUID: {
+        type: String,
+        required: false
+    },
+    resetExpires: {
+        type: Date,
+        required: false
+    },
     bio: {
         type: String
     },
@@ -50,7 +58,7 @@ userSchema.statics.findByEmail = (email) => {
         if (!result) {
             return false;
         }
-        return true;
+        return result;
     });
 };
 

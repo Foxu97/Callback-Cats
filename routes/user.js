@@ -23,6 +23,8 @@ router.post('/signin', userController.postUserSignIn);
 
 router.get('/activation/:activationGUID', userController.getAccountActivation);
 
+router.post('/forgot', userController.postForgotPassword);
 
+router.post('/reset/:resetGUID', userController.postResetPassword);
 
 module.exports = router;
