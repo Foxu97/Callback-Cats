@@ -1,4 +1,5 @@
 const { Schema, model } = require('mongoose');
+const bcrypt = require('bcrypt');
 
 const userSchema = new Schema({
     email: {
@@ -53,13 +54,15 @@ const userSchema = new Schema({
     }
 });
 
-userSchema.statics.findByEmail = (email) => {
-    return User.findOne({ email: email }, (result) => {
-        if (!result) {
-            return false;
-        }
-        return result;
-    });
+userSchema.methods.hashPassword = function () {
+    return bcrypt.hash(this.password, 12)
+        .then(hash => {
+            this.password = hash;
+            this.save();
+        })
+        .catch(err => {
+            console.log(err);
+        });
 };
 
 const User = model('User', userSchema);

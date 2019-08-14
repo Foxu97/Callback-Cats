@@ -16,11 +16,12 @@ exports.postRegisterUser = (req, res, next) => {
     if (!errors.isEmpty()) {
         return res.status(422).send(errors);
     }
-    bcrypt.genSalt(saltRounds, function (err, salt) {
-        bcrypt.hash(req.body.password, salt, function (err, hash) {
-            req.body.password = hash;
-            req.body.activationGUID = uuidv1();
-            User.create(req.body);
+
+    req.body.activationGUID = uuidv1();
+    let user = new User(req.body);
+
+    user.hashPassword()
+        .then(() => {
             let activationLink = 'http:/localhost:9092/user/activation/' + req.body.activationGUID;
             const msg = {
                 to: req.body.email,
@@ -30,8 +31,28 @@ exports.postRegisterUser = (req, res, next) => {
             };
             sgMail.send(msg);
             res.status(200).send('User created successful');
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(401).send('Something went wrong');
         });
-    });
+
+    // bcrypt.genSalt(saltRounds, function (err, salt) {
+    //     bcrypt.hash(req.body.password, salt, function (err, hash) {
+    //         req.body.password = hash;
+    //         req.body.activationGUID = uuidv1();
+    //         User.create(req.body);
+    //         let activationLink = 'http:/localhost:9092/user/activation/' + req.body.activationGUID;
+    //         const msg = {
+    //             to: req.body.email,
+    //             from: 'helloworld199797@gmail.com',
+    //             subject: 'Callback Cats activation link',
+    //             text: activationLink,
+    //         };
+    //         sgMail.send(msg);
+    //         res.status(200).send('User created successful');
+    //     });
+    // });
 };
 
 exports.getAccountActivation = (req, res, next) => {
@@ -80,7 +101,7 @@ exports.postUserSignIn = (req, res, next) => {
 
 exports.postForgotPassword = (req, res, next) => {
     const { email } = req.body;
-    User.findByEmail(email).then(user => {
+    User.findOne({ email: email }).then(user => {
         user.resetGUID = uuidv1();
         user.save();
         let resetLink = 'http://localhost:9092/user/reset/' + user.resetGUID;
@@ -104,9 +125,8 @@ exports.postResetPassword = (req, res, next) => {
     User.findOne({ resetGUID: req.params.resetGUID })
         .then(user => {
             user.password = password;
-            //dodac haszowanie hasla
             user.resetGUID = undefined;
-            user.save();
+            user.hashPassword();
             res.status(200).send('Password has been changed');
         })
         .catch(err => {
