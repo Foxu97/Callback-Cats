@@ -32,14 +32,6 @@ const userSchema = new Schema({
         type: Boolean,
         default: false
     },
-    resetGUID: {
-        type: String,
-        required: false
-    },
-    resetExpires: {
-        type: Date,
-        required: false
-    },
     bio: {
         type: String
     },

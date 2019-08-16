@@ -1,6 +1,7 @@
 const validator = require('validator');
 const { validationResult } = require('express-validator');
 const User = require('../models/user');
+const ResetToken = require('../models/resetToken');
 
 const uuidv1 = require('uuid/v1');
 const apiKey = require('../config/sendGridConfig').apiKey;
@@ -9,7 +10,6 @@ sgMail.setApiKey(apiKey);
 
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
-const saltRounds = 12;
 
 exports.postRegisterUser = (req, res, next) => {
     const errors = validationResult(req);
@@ -101,19 +101,24 @@ exports.postUserSignIn = (req, res, next) => {
 
 exports.postForgotPassword = (req, res, next) => {
     const { email } = req.body;
-    User.findOne({ email: email }).then(user => {
-        user.resetGUID = uuidv1();
-        user.save();
-        let resetLink = 'http://localhost:9092/user/reset/' + user.resetGUID;
-        const msg = {
-            to: email,
-            from: 'helloworld199797@gmail.com',
-            subject: 'Callback Cats password reset link',
-            text: resetLink,
-        };
-        sgMail.send(msg);
-        res.status(200).send('Password reset link has been sent on provided mail');
-    })
+    User.findOne({ email: email })
+        .then(user => {
+            let resetToken = new ResetToken({ userId: user._id, token: uuidv1() });
+            resetToken.save((err) => {
+                if (err) {
+                    return res.status(500).send(err);
+                }
+                let resetLink = 'http://localhost:9092/user/reset/' + resetToken.token;
+                const msg = {
+                    to: email,
+                    from: 'helloworld199797@gmail.com',
+                    subject: 'Callback Cats password reset link',
+                    text: resetLink,
+                };
+                sgMail.send(msg);
+                res.status(200).send('Password reset link has been sent on provided mail ' + resetLink);
+            });
+        })
         .catch(err => {
             console.log(err);
             res.status(200).send('Password reset link has been sent on provided mail.');
@@ -122,15 +127,23 @@ exports.postForgotPassword = (req, res, next) => {
 
 exports.postResetPassword = (req, res, next) => {
     const { password } = req.body;
-    User.findOne({ resetGUID: req.params.resetGUID })
-        .then(user => {
-            user.password = password;
-            user.resetGUID = undefined;
-            user.hashPassword();
-            res.status(200).send('Password has been changed');
-        })
-        .catch(err => {
-            console.log(err);
-            res.status(401).send('Something went wrong');
+    ResetToken.findOne({ token: req.params.resetGUID })
+        .then(token => {
+            if (!token) {
+                return res.status(400).send('Token not found may be expired.');
+            }
+            User.findOne({ _id: token.userId })
+                .then(user => {
+                    console.log('here')
+                    if (!user) {
+                        return res.status(400).send('No user found');
+                    }
+                    user.password = password;
+                    //token.token = undefined;
+                    user.hashPassword()
+                        .then(() => {
+                            res.status(200).send('Password has been changed');
+                        });
+                });
         });
 };
