@@ -22,7 +22,7 @@ exports.postRegisterUser = (req, res, next) => {
 
     user.hashPassword()
         .then(() => {
-            let activationLink = 'http:/localhost:9092/user/activation/' + req.body.activationGUID;
+            let activationLink = 'http://localhost:9092/user/activation/' + req.body.activationGUID;
             const msg = {
                 to: req.body.email,
                 from: 'helloworld199797@gmail.com',
@@ -30,29 +30,12 @@ exports.postRegisterUser = (req, res, next) => {
                 text: activationLink,
             };
             sgMail.send(msg);
-            res.status(200).send('User created successful');
+            res.status(200).send('User created successfuly ' + activationLink);
         })
         .catch(err => {
             console.log(err);
             res.status(401).send('Something went wrong');
         });
-
-    // bcrypt.genSalt(saltRounds, function (err, salt) {
-    //     bcrypt.hash(req.body.password, salt, function (err, hash) {
-    //         req.body.password = hash;
-    //         req.body.activationGUID = uuidv1();
-    //         User.create(req.body);
-    //         let activationLink = 'http:/localhost:9092/user/activation/' + req.body.activationGUID;
-    //         const msg = {
-    //             to: req.body.email,
-    //             from: 'helloworld199797@gmail.com',
-    //             subject: 'Callback Cats activation link',
-    //             text: activationLink,
-    //         };
-    //         sgMail.send(msg);
-    //         res.status(200).send('User created successful');
-    //     });
-    // });
 };
 
 exports.getAccountActivation = (req, res, next) => {
@@ -85,9 +68,11 @@ exports.postUserSignIn = (req, res, next) => {
             if (!result) {
                 return res.status(401).send("Auth failed");
             }
+
             const token = jwt.sign({
-                email: user.email
+                id: user._id
             }, "secret_string", { expiresIn: "1h" });
+
             res.status(200).json({
                 token: token,
                 expiresIn: 3600
