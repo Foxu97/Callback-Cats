@@ -68,3 +68,46 @@ exports.getPublishPost = (req, res, next) => {
                 });
         });
 };
+
+exports.searchPosts = (req, res, next) => {
+    // first it should be checked if they are friends but not implemented yet
+    if (req.body.searchBy.toLowerCase() === "tag") {
+        Post.find({ state: "published", tags: req.body.searchedPhrase })
+            .then((fetchedPosts) => {
+                if (fetchedPosts.length === 0) {
+                    return res.status(404).send("No post fetched");
+                }
+                res.status(200).json(fetchedPosts);
+            })
+            .catch(err => {
+                res.status(404).send("Something went wrong");
+                console.log(err);
+            });
+    }
+    else if (req.body.searchBy.toLowerCase() === "title") {
+        Post.find({ state: "published", title: { "$regex": req.body.searchedPhrase, "$options": "i" } })
+            .then((fetchedPosts) => {
+                if (fetchedPosts.length === 0) {
+                    return res.status(404).send("No post fetched");
+                }
+                res.status(200).json(fetchedPosts);
+            })
+            .catch(err => {
+                res.status(404).send("Something went wrong");
+                console.log(err);
+            });
+    }
+    else if (req.body.searchBy.toLowerCase() === "description") {
+        Post.find({ state: "published", description: { "$regex": req.body.searchedPhrase, "$options": "i" } })
+            .then((fetchedPosts) => {
+                if (fetchedPosts.length === 0) {
+                    return res.status(404).send("No post fetched");
+                }
+                res.status(200).json(fetchedPosts);
+            })
+            .catch(err => {
+                res.status(404).send("Something went wrong");
+                console.log(err);
+            });
+    }
+}

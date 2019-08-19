@@ -15,4 +15,6 @@ router.delete('/delete/:id', postController.deletePost);
 
 router.get('/publish/:id', postController.getPublishPost);
 
+router.post('/search', postController.searchPosts);
+
 module.exports = router;
