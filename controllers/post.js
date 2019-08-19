@@ -46,11 +46,25 @@ exports.putUpdatePost = (req, res, next) => {
 
 exports.deletePost = (req, res, next) => {
     const postID = req.params.id;
+    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
     Post.deleteOne({ _id: postID, createdBy: loggedID })
-        .then(() => {
+        .then((docs) => {
             if (docs.n === 0) {
                 return res.status(400).send('No posts found');
             }
             res.status(200).send('Post deleted');
+        });
+};
+
+exports.getPublishPost = (req, res, next) => {
+    const postID = req.params.id;
+    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
+    Post.findOne({ _id: postID, createdBy: loggedID })
+        .then((post) => {
+            post.state = 'published';
+            post.save()
+                .then(() => {
+                    res.status(200).send('Post published')
+                });
         });
 };
