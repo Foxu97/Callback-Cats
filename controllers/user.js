@@ -111,6 +111,10 @@ exports.postForgotPassword = (req, res, next) => {
 };
 
 exports.postResetPassword = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).send(errors);
+    }
     const { password } = req.body;
     ResetToken.findOne({ token: req.params.resetGUID })
         .then(token => {
@@ -119,12 +123,10 @@ exports.postResetPassword = (req, res, next) => {
             }
             User.findOne({ _id: token.userId })
                 .then(user => {
-                    console.log('here')
                     if (!user) {
                         return res.status(400).send('No user found');
                     }
                     user.password = password;
-                    //token.token = undefined;
                     user.hashPassword()
                         .then(() => {
                             res.status(200).send('Password has been changed');

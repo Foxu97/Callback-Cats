@@ -12,6 +12,6 @@ router.get('/activation/:activationGUID', userController.getAccountActivation);
 
 router.post('/forgot', userController.postForgotPassword);
 
-router.post('/reset/:resetGUID', userController.postResetPassword);
+router.post('/reset/:resetGUID', validator.resetValidation, userController.postResetPassword);
 
 module.exports = router;

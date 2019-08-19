@@ -23,3 +23,7 @@ exports.postValidation = [
         return value.length < 11;
     }).withMessage('Too many tags, maximum number is 10')
 ];
+
+exports.resetValidation = [
+    body('password').exists()
+];

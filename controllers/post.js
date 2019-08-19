@@ -10,9 +10,10 @@ exports.postAddPost = (req, res, next) => {
     }
     req.body.createdBy = loggedID;
     let newPost = new Post(req.body);
-    newPost.save().then(() => {
-        res.status(200).send('Post has been added');
-    });
+    newPost.save()
+        .then(() => {
+            res.status(200).send('Post has been added');
+        });
 };
 
 exports.getViewMyPosts = (req, res, next) => {
@@ -23,6 +24,33 @@ exports.getViewMyPosts = (req, res, next) => {
         });
 };
 
-exports.putUpdatePost = (req, res, next) => {
+exports.getViewPost = (req, res, next) => {
+    const postID = req.params.id;
+    Post.findById(postID)
+        .then(post => {
+            res.status(200).send(post);
+        });
+};
 
+exports.putUpdatePost = (req, res, next) => {
+    const postID = req.params.id;
+    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
+    Post.updateOne({ _id: postID, createdBy: loggedID }, req.body)
+        .then((docs) => {
+            if (docs.n === 0) {
+                return res.status(400).send('No posts found');
+            }
+            res.status(200).send('Post updated');
+        });
+};
+
+exports.deletePost = (req, res, next) => {
+    const postID = req.params.id;
+    Post.deleteOne({ _id: postID, createdBy: loggedID })
+        .then(() => {
+            if (docs.n === 0) {
+                return res.status(400).send('No posts found');
+            }
+            res.status(200).send('Post deleted');
+        });
 };
