@@ -1,4 +1,4 @@
-const validator = require('validator');
+const validator = require('../middleware/validator');
 const { validationResult } = require('express-validator');
 const User = require('../models/user');
 const ResetToken = require('../models/resetToken');
@@ -134,3 +134,78 @@ exports.postResetPassword = (req, res, next) => {
                 });
         });
 };
+
+exports.putUpdateProfile = (req, res, next) => { 
+    if (req.body.email) {
+        if(validator.validateEmail(req.body.email)){
+            User.findByIdAndUpdate(req.user._id, { email: req.body.email }, (err, result) => { 
+                if (err){
+                    console.log(err)
+                    res.status(404).send("Updating failed");
+                }
+                console.log(result)
+                res.status(200).send("Updated successfull");
+            })
+        }
+        else {
+            res.status(404).send("Email incorrect");
+        }
+    }
+    if (req.body.gender) {
+        if (req.body.gender.toLowerCase() === 'male' || req.body.gender.toLowerCase() === 'female'){
+            User.findByIdAndUpdate(req.user._id, { gender: req.body.gender }, (err, result) => { 
+                if (err){
+                    console.log(err);
+                    res.status(404).send("Updating failed");
+                }
+                console.log(result)
+                res.status(200).send("Updated successfull");
+            })
+        }
+        else{
+            res.status(404).send("Gender incorrect");
+        }
+
+    }
+    if (req.body.birthdate) {
+        if(Date.parse(req.body.birthdate)){
+            User.findByIdAndUpdate(req.user._id, { birthdate: req.body.birthdate }, (err, result) => {
+                if(err){
+                    console.log(err);
+                    res.status(404).send("Updating failed");
+                }
+                console.log(result)
+                res.status(200).send("Updated successfull");
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(404).send("Something went wrong");
+            });
+        }
+        else{
+            res.status(404).send("Date incorrect");
+        }
+
+    }
+    if (req.body.password) {
+        if(validator.validatePassword(req.body.password)){
+            return bcrypt.hash(req.body.password, 12)
+            .then(hash => {
+                User.findByIdAndUpdate(req.user._id, {password: hash}, (err, result) => {
+                    if(err){
+                        console.log(err);
+                        res.status(404).send("Updating failed");
+                    }
+                    console.log(result);
+                    res.status(200).send("Updated sucessfull");
+                });
+            })
+            .catch(err => {
+                console.log(err);
+                res.status(404).send("Something went wrong");
+            });
+        }
+    }
+
+
+}
