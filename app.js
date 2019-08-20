@@ -8,6 +8,8 @@ const User = require('./models/user');
 const { Strategy, ExtractJwt } = require('passport-jwt');
 const userRouter = require('./routes/user');
 const postRouter = require('./routes/post');
+const adminRoutes = require('./routes/admin');
+const adminAuth = require('./middleware/adminAuth').adminAuth;
 
 const app = express();
 
@@ -21,6 +23,8 @@ app.use(bodyParser.json());
 app.use(passport.initialize());
 
 app.use('/user', userRouter);
+
+app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, adminRoutes)
 
 passport.use(new Strategy(options, function (jwt_payload, done) {
     User.findById(jwt_payload.id, function (err, user) {
