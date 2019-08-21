@@ -64,7 +64,7 @@ exports.getPublishPost = (req, res, next) => {
             post.state = 'published';
             post.save()
                 .then(() => {
-                    res.status(200).send('Post published')
+                    res.status(200).send('Post published');
                 });
         });
 };
@@ -110,4 +110,8 @@ exports.searchPosts = (req, res, next) => {
                 console.log(err);
             });
     }
+<<<<<<< Updated upstream
 }
+=======
+} 
+>>>>>>> Stashed changes

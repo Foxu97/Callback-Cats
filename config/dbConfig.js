@@ -1,6 +1,5 @@
 module.exports = {
-
-    url: "mongodb+srv://AdminBazy:ZAQwsx12@softserve-oyk4k.azure.mongodb.net/CallbackCats?retryWrites=true&w=majority",
+    url: process.env.MONGOOSE_URL,
 
     options: {
         useNewUrlParser: true

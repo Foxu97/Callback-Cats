@@ -1,53 +1,44 @@
-const validator = require('validator');
-const { validationResult } = require('express-validator');
 const User = require('../models/user');
 const ResetToken = require('../models/resetToken');
+const sendMail = require('../utils/sendMail');
 
 const uuidv1 = require('uuid/v1');
-const apiKey = require('../config/sendGridConfig').apiKey;
-const sgMail = require('@sendgrid/mail');
-sgMail.setApiKey(apiKey);
-
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 
 exports.postRegisterUser = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).send(errors);
-    }
-
     req.body.activationGUID = uuidv1();
     let user = new User(req.body);
 
     user.hashPassword()
         .then(() => {
-            let activationLink = 'http://localhost:9092/user/activation/' + req.body.activationGUID;
-            const msg = {
-                to: req.body.email,
-                from: 'helloworld199797@gmail.com',
-                subject: 'Callback Cats activation link',
-                text: activationLink,
-            };
-            sgMail.send(msg);
+            const activationLink = 'http://localhost:9092/user/activation/' + req.body.activationGUID;
+            sendMail(activationLink, req.body.email);
             res.status(200).send('User created successfuly ' + activationLink);
         })
         .catch(err => {
-            console.log(err);
-            res.status(401).send('Something went wrong');
+            res.status(401).send(err.message);
         });
+
 };
 
 exports.getAccountActivation = (req, res, next) => {
     User.findOne({ activationGUID: req.params.activationGUID })
         .then(fetchedUser => {
+            if (!fetchedUser) {
+                throw new Error('No user with that activation ID found!');
+            }
             fetchedUser.activationGUID = null;
             fetchedUser.active = true;
-            fetchedUser.save();
+            return fetchedUser.save();
+        })
+        .then(() => {
             res.status(200).send("Account is active");
         })
-        .catch(err => {
-            res.status(400).send("Something went wrong");
+        .catch((err) => {
+            res.status(400).send({
+                message: String(err)
+            });
         });
 };
 
@@ -56,17 +47,17 @@ exports.postUserSignIn = (req, res, next) => {
     User.findOne({ email: req.body.email })
         .then(fetchedUser => {
             if (!fetchedUser) {
-                return res.status(401).send("No user found");
+                throw new Error('Invalid credentials');
             }
             if (!fetchedUser.active) {
-                return res.status(401).send("Account is not active");
+                throw new Error('Account is not active');
             }
             user = fetchedUser;
             return bcrypt.compare(req.body.password, fetchedUser.password);
         })
         .then(result => {
             if (!result) {
-                return res.status(401).send("Auth failed");
+                throw new Error('Auth failed');
             }
 
             const token = jwt.sign({
@@ -80,27 +71,27 @@ exports.postUserSignIn = (req, res, next) => {
         })
         .catch(err => {
             console.log(err);
-            return res.status(401).send("Something went wrong");
+            res.status(401).send({
+                "message": String(err)
+            });
         });
 };
 
 exports.postForgotPassword = (req, res, next) => {
     const { email } = req.body;
+
     User.findOne({ email: email })
         .then(user => {
+            if (!user) {
+                throw new Error('No e-mail found in the database');
+            }
             let resetToken = new ResetToken({ userId: user._id, token: uuidv1() });
             resetToken.save((err) => {
                 if (err) {
                     return res.status(500).send(err);
                 }
                 let resetLink = 'http://localhost:9092/user/reset/' + resetToken.token;
-                const msg = {
-                    to: email,
-                    from: 'helloworld199797@gmail.com',
-                    subject: 'Callback Cats password reset link',
-                    text: resetLink,
-                };
-                sgMail.send(msg);
+                sendMail(resetLink, email);
                 res.status(200).send('Password reset link has been sent on provided mail ' + resetLink);
             });
         })
@@ -111,26 +102,27 @@ exports.postForgotPassword = (req, res, next) => {
 };
 
 exports.postResetPassword = (req, res, next) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).send(errors);
-    }
     const { password } = req.body;
     ResetToken.findOne({ token: req.params.resetGUID })
         .then(token => {
             if (!token) {
-                return res.status(400).send('Token not found may be expired.');
+                throw new Error('Token not found may be expired.');
             }
-            User.findOne({ _id: token.userId })
-                .then(user => {
-                    if (!user) {
-                        return res.status(400).send('No user found');
-                    }
-                    user.password = password;
-                    user.hashPassword()
-                        .then(() => {
-                            res.status(200).send('Password has been changed');
-                        });
+            return User.findOne({ _id: token.userId });
+        })
+        .then(user => {
+            if (!user) {
+                throw new Error('No user found');
+            }
+            user.password = password;
+            user.hashPassword()
+                .then(() => {
+                    res.status(200).send('Password has been changed');
                 });
+        })
+        .catch(err => {
+            res.status(400).send({
+                "message": String(err)
+            });
         });
 };
