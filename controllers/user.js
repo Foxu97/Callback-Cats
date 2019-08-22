@@ -126,3 +126,25 @@ exports.postResetPassword = (req, res, next) => {
             });
         });
 };
+
+exports.putUpdateProfile = (req, res, next) => {
+    if(req.body.role){
+        return res.status(401).send("Only admin can change users role");
+    }
+    User.findByIdAndUpdate(req.user._id, req.body, (err, result) => {
+        if(err){
+            console.log(err);
+            res.status(404).send("Updating failed");
+        }
+        res.status(404).send("Updating ok");
+    });
+}
+exports.deleteProfile = (req, res, next) => { 
+    User.findByIdAndDelete(req.user._id, (err, result) => {
+        if(err){
+            console.log(err);
+            res.status(400).send("Something went wrong");
+        }
+        res.status(200).send("Account deleted");
+    })
+}
