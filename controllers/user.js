@@ -5,8 +5,14 @@ const sendMail = require('../utils/sendMail');
 const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
+const { validationResult } = require('express-validator');
 
 exports.postRegisterUser = (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
     req.body.activationGUID = uuidv1();
     let user = new User(req.body);
 
@@ -128,20 +134,27 @@ exports.postResetPassword = (req, res, next) => {
 };
 
 exports.putUpdateProfile = (req, res, next) => {
-    if(req.body.role){
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ errors: errors.array() });
+    }
+
+    if (req.body.role) {
         return res.status(401).send("Only admin can change users role");
     }
     User.findByIdAndUpdate(req.user._id, req.body, (err, result) => {
-        if(err){
-            console.log(err);
+        if (err) {
             res.status(404).send("Updating failed");
+        }
+        if (req.body.password) {
+            result.hashPassword();
         }
         res.status(404).send("Updating ok");
     });
 }
-exports.deleteProfile = (req, res, next) => { 
+exports.deleteProfile = (req, res, next) => {
     User.findByIdAndDelete(req.user._id, (err, result) => {
-        if(err){
+        if (err) {
             console.log(err);
             res.status(400).send("Something went wrong");
         }

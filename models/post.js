@@ -1,25 +1,15 @@
 const { Schema, model } = require('mongoose');
 
 const postSchema = new Schema({
-    description: {
-        type: String,
-        required: true
-    },
-    title: {
-        type: String,
-        required: true
-    },
+    description: { type: String, },
+    title: { type: String, },
     // photo: {
 
     // },
     // file: {
 
     // },
-    privacyLevel: {
-        type: String,
-        enum: ['public', 'friendsOnly', 'private'],
-        required: true
-    },
+    privacyLevel: { type: String, },
     createdAt: {
         type: Date,
         default: Date.now
@@ -29,9 +19,7 @@ const postSchema = new Schema({
         enum: ['draft', 'published'],
         default: 'draft'
     },
-    tags: {
-        type: [String]
-    },
+    tags: { type: [String] },
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: 'User'

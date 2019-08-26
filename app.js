@@ -23,7 +23,6 @@ app.use(passport.initialize());
 app.use('/user', userRouter);
 
 passport.use(new Strategy(passportOptions, function (jwt_payload, done) {
-app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, adminRoutes)
     User.findById(jwt_payload.id, function (err, user) {
         if (err) {
             return done(err, false);
@@ -36,6 +35,7 @@ app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, a
 }));
 
 app.use('/post', passport.authenticate('jwt', { session: false }), postRouter);
+app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, adminRoutes)
 
 mongoose
     .connect(config.url, config.options)
@@ -43,6 +43,6 @@ mongoose
         return initAdmin();
     })
     .then(() => {
-        app.listen(9092, () => console.log('Web server listening on port 9092.'));
+        app.listen(9092, () => console.log('Web server listening on port here 9092.'));
     })
     .catch(err => console.log(err));

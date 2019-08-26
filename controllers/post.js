@@ -110,8 +110,4 @@ exports.searchPosts = (req, res, next) => {
                 console.log(err);
             });
     }
-<<<<<<< Updated upstream
 }
-=======
-} 
->>>>>>> Stashed changes

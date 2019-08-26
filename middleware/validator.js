@@ -27,12 +27,27 @@ exports.postValidation = [
 exports.resetValidation = [
     body('password').exists()
 ];
-exports.validateEmail = (email) => {
-    const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return emailRegex.test(String(email).toLowerCase());
-}
-exports.validatePassword = (password) => {
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#%*?&])[A-Za-z\d@$!#%*?&]{8,}$/;
-    return passwordRegex.test(password);
-}
+
+exports.updateValidation = [
+    body('password').optional().matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#%*?&])[A-Za-z\d@$!#%*?&]{8,}$/).withMessage('Passowrd has to contain at least 1 special character, 1 number, 1 lower and 1 upper case character and be of lenght of not lower than 8'),
+    body('email').optional().normalizeEmail().isEmail().withMessage('Please provide a proper e-mail adress'),
+    body('email').optional().custom(value => {
+        return User.findOne({ email: value }).then(user => {
+            if (user) {
+                return Promise.reject('E-mail is in use');
+            }
+        });
+    }),
+    body('gender').optional().isIn(['male', 'female']),
+    body('birthdate').optional().isISO8601().withMessage('Please provide a proper date in the ISO8601 format')
+]
+
+// exports.validateEmail = (email) => {
+//     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+//     return emailRegex.test(String(email).toLowerCase());
+// }
+// exports.validatePassword = (password) => {
+//     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#%*?&])[A-Za-z\d@$!#%*?&]{8,}$/;
+//     return passwordRegex.test(password);
+// }
 
