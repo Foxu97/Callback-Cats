@@ -19,5 +19,9 @@ router.put('/update', passport.authenticate('jwt', { session: false }), validati
 
 router.delete('/delete', passport.authenticate('jwt', { session: false }), userController.deleteProfile);
 
+router.put('/addFriend', passport.authenticate('jwt', { session: false }), userController.addFriend);
+
+router.put('/acceptFriendsRequest', passport.authenticate('jwt', { session: false }), userController.acceptFirendsRequest);
+
 
 module.exports = router;

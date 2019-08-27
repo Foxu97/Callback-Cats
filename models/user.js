@@ -5,6 +5,7 @@ const validator = require('validator');
 const userSchema = new Schema({
     email: { type: String },
     password: { type: String },
+    username: { type: String },
     birthdate: { type: Date },
     gender: { type: String, },
     role: { type: String, },
@@ -13,7 +14,10 @@ const userSchema = new Schema({
     bio: { type: String },
     country: { type: String },
     city: { type: String },
-    color: { type: String }
+    color: { type: String },
+    friendsList: { type: Array },
+    incomingFriendsRequests: { type: Array },
+    outcomingFriendsRequests: { type: Array } //have to think if it is necessary
 });
 
 userSchema.methods.hashPassword = function () {
