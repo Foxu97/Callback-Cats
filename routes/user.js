@@ -27,5 +27,13 @@ router.put('/addFriend', passport.authenticate('jwt', { session: false }), userC
 
 router.put('/acceptFriendsRequest', passport.authenticate('jwt', { session: false }), userController.acceptFirendsRequest);
 
+router.get('/friendsList', passport.authenticate('jwt', { session: false }), userController.getFriendsList);
+
+router.get('/incomingRequests', passport.authenticate('jwt', { session: false }), userController.getIncomingRequests);
+
+router.get('/outcomingRequests', passport.authenticate('jwt', { session: false }), userController.getOutcomingRequests);
+
+router.put('/deleteFriend', passport.authenticate('jwt', { session: false }), userController.deleteFriend)
+
 
 module.exports = router;
