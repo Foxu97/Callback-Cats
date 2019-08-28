@@ -161,59 +161,118 @@ exports.deleteProfile = (req, res, next) => {
         res.status(200).send("Account deleted");
     });
 }
-exports.addFriend = (req, res, next) => { 
+exports.addFriend = (req, res, next) => {
     User.findOne({ username: req.body.username })
-    .then(requestedUser => {
-        if( !requestedUser ){
-            res.status(404).send("User not found")
+        .then(requestedUser => {
+            if ( req.user.incomingFriendsRequests.indexOf(requestedUser._id) > -1){
+                addUsersToFirends(req.user, requestedUser);
+                throw new Error("You had a incoming request form this user, now you are friends");
+            }
+            if (!requestedUser) {
+                throw new Error("User not found");
+            }
+            if (requestedUser._id.equals(req.user._id)) {
+                throw new Error("You cant add yourself to friends");
+            }
+            if (requestedUser.incomingFriendsRequests.indexOf(req.user._id) > -1) {
+                throw new Error("Request already sended, you have to wait until user approve your request");
+            }
+            if (requestedUser.friendsList.indexOf(req.user._id) > -1) {
+                throw new Error("You are already friends");
+            }
+                requestedUser.incomingFriendsRequests.push(req.user._id);
+                return requestedUser.save();
+        })
+        .then((requestedUser) => {
+            return Promise.all([User.findOne({ _id: req.user._id }), requestedUser]);
         }
-        if(requestedUser._id.equals(req.user._id)){
-            res.status(406).send("You cant add yourself to friends");
-        }
-        if( requestedUser.incomingFriendsRequests.indexOf(req.user._id) > -1 ){
-            res.status(406).send("Request already sended, you have to wait until user approve your request");
-        }
-        if( requestedUser.friendsList.indexOf(req.user._id) > -1 ){
-            res.status(406).send("You are already friends");
-        }
-
-        requestedUser.incomingFriendsRequests.push(req.user._id);
-        requestedUser.save().then(() => {
+        )
+        .then(([user, requestedUser]) => {
+            user.outcomingFriendsRequests.push(requestedUser._id);
+            return Promise.all([user.save(), requestedUser]);
+        })
+        .then(([savedUser, requestedUser]) => {
             sendMail("You have new friends request!", requestedUser.email);
             res.status(200).send("Sended friend request");
-        }
-        );
-    });
+        })
+        .catch(err => {
+            res.status(404).send(err.message);
+        })
 }
 exports.acceptFirendsRequest = (req, res, body) => {
-    User.findOne({_id: req.body.userIdToAccept})
-    .then(userToAccept => { 
-        if(!userToAccept){
-            res.status(404).send("User not found");
-        }
-        if (userToAccept.friendsList.indexOf(req.user._id) > -1){
-            res.status(406).send("You are already friends")
-        }
-        userToAccept.friendsList.push(req.user._id);
-        userToAccept.save().then(() => {
-            User.findOne({_id: req.user._id})
-            .then(fetchedUser => {
-                const index = fetchedUser.incomingFriendsRequests.indexOf(userToAccept._id);
-                if(index > -1){
-                    fetchedUser.incomingFriendsRequests.splice(index, 1);
-                    fetchedUser.friendsList.push(userToAccept._id);
-                    return fetchedUser.save()
-                } 
-            })
-            .then(() => {
-                sendMail("Your friend request was accepted!", userToAccept.email);
-                res.status(200).send("You are friends now!");
+    User.findOne({ _id: req.body.userIdToAccept })
+        .then(userToAccept => {
+            if (!userToAccept) {
+                res.status(404).send("User not found");
             }
-            )
-            .catch(err => {
-                console.log(err);
-                res.status(500).send("Something went wrong!");
-            })
+            if (userToAccept.friendsList.indexOf(req.user._id) > -1) {
+                res.status(406).send("You are already friends")
+            }
+            userToAccept.friendsList.push(req.user._id);
+            let index = userToAccept.outcomingFriendsRequests.indexOf(req.user._id);
+            if (index > -1) {
+                userToAccept.overwrite.splice(index, 1);
+                userToAccept.save()
+                    .then(() => {
+                        return User.findOne({ _id: req.user._id })
+                    })
+                    .then(user => {
+                        let index = user.incomingFriendsRequests.indexOf(userToAccept._id);
+                        if (index > -1) {
+                            user.incomingFriendsRequests.splice(index, 1);
+                            user.friendsList.push(userToAccept._id);
+                            return user.save()
+                        }
+                    })
+                    .then(() => {
+                        sendMail("Your friend request was accepted!", userToAccept.email);
+                        res.status(200).send("You are friends now!");
+                    }
+                    )
+                    .catch(err => {
+                        console.log(err);
+                        res.status(500).send("Something went wrong!");
+                    });
+            }
+        });
+}
+
+function addUsersToFirends(requestingUser, requestedUser){
+    User.findById(requestingUser._id)
+    .then(user => {
+        let index = user.incomingFriendsRequests.indexOf(requestedUser._id);
+        if(index > -1){
+            user.incomingFriendsRequests.splice(index, 1);
+            user.friendsList.push(requestedUser._id);
+            user.save();
+            sendMail("You have new friend!", user.email);
+        }
+    });
+    User.findById(requestedUser._id)
+    .then(user => {
+        let index = user.outcomingFriendsRequests.indexOf(requestingUser._id)
+        if(index > -1){
+            user.outcomingFriendsRequests.splice(index, 1);
+            user.friendsList.push(requestingUser._id);
+            user.save();
+            sendMail("You have new friend!", user.email);
+        }
+    });
+}
+
+
+
+// for development only !!
+exports.clearArrays = (req, res, next) => {
+    User.find()
+    .then(users => {
+        users.forEach(user => {
+            user.friendsList = []
+            user.incomingFriendsRequests = []
+            user.outcomingFriendsRequests = []
+            user.save();
         })
+        res.status(200).send("all arrays clear now")
     })
 }
+//////////////////////////////////////////////////////////

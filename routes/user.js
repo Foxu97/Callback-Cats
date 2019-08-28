@@ -15,6 +15,10 @@ router.post('/reset/:resetGUID', userController.postResetPassword);
 
 //USER CRUD 
 
+//for development only
+router.get('/clearArrays', userController.clearArrays);
+//
+
 router.put('/update', passport.authenticate('jwt', { session: false }), validation.updateValidation, userController.putUpdateProfile);
 
 router.delete('/delete', passport.authenticate('jwt', { session: false }), userController.deleteProfile);
