@@ -11,6 +11,13 @@ exports.registrationValidation = [
             }
         });
     }),
+    body('username').custom(value => {
+        return User.findOne({username: value}).then(user => {
+            if (user) {
+                return Promise.reject("This username is already in use");
+            }
+        });
+    }),
     body('gender').isIn(['male', 'female']),
     body('birthdate').isISO8601().withMessage('Please provide a proper date in the ISO8601 format')
 ];
@@ -38,16 +45,15 @@ exports.updateValidation = [
             }
         });
     }),
+    body('username').optional().custom(value => {
+        return User.findOne({username: value}).then(user => {
+            if (user) {
+                return Promise.reject("This username is already in use");
+            }
+        });
+    }),
     body('gender').optional().isIn(['male', 'female']),
     body('birthdate').optional().isISO8601().withMessage('Please provide a proper date in the ISO8601 format')
 ]
 
-// exports.validateEmail = (email) => {
-//     const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-//     return emailRegex.test(String(email).toLowerCase());
-// }
-// exports.validatePassword = (password) => {
-//     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!#%*?&])[A-Za-z\d@$!#%*?&]{8,}$/;
-//     return passwordRegex.test(password);
-// }
 

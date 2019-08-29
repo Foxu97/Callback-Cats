@@ -23,6 +23,9 @@ const userSchema = new Schema({
     bio: { type: String },
     country: { type: String },
     city: { type: String },
+    friendsList: { type: Array },
+    incomingFriendsRequests: { type: Array },
+    outcomingFriendsRequests: { type: Array } //have to think if it is necessary
     visible: {
         type: Boolean,
         default: true,
