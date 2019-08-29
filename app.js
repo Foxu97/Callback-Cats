@@ -12,14 +12,13 @@ const { Strategy } = require('passport-jwt');
 const userRouter = require('./routes/user');
 const postRouter = require('./routes/post');
 const adminRoutes = require('./routes/admin');
+const friendsRouter = require('./routes/friends');
 const adminAuth = require('./middleware/adminAuth').adminAuth;
 
 const app = express();
 
 app.use(bodyParser.json());
 app.use(passport.initialize());
-
-app.use('/user', userRouter);
 
 passport.use(new Strategy(passportOptions, function (jwt_payload, done) {
     User.findById(jwt_payload.id, function (err, user) {
@@ -33,6 +32,8 @@ passport.use(new Strategy(passportOptions, function (jwt_payload, done) {
     });
 }));
 
+app.use('/user', userRouter);
+app.use('/friends', passport.authenticate('jwt', { session: false }), friendsRouter);
 app.use('/post', passport.authenticate('jwt', { session: false }), postRouter);
 app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, adminRoutes);
 
