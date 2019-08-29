@@ -1,27 +1,45 @@
 const { Schema, model } = require('mongoose');
 const bcrypt = require('bcrypt');
-const validator = require('validator');
 
 const userSchema = new Schema({
+    username: { type: String },
     email: { type: String },
-    password: { type: String },
+    password: {
+        type: String,
+        select: false
+    },
     birthdate: { type: Date },
-    gender: { type: String, },
-    role: { type: String, },
-    activationGUID: { type: String, },
-    active: { type: Boolean, },
+    gender: { type: String },
+    role: { type: String },
+    activationGUID: {
+        type: String,
+        select: false
+    },
+    active: {
+        type: Boolean,
+        default: false,
+        select: false
+    },
     bio: { type: String },
     country: { type: String },
     city: { type: String },
-    color: { type: String }
+    visible: {
+        type: Boolean,
+        default: true,
+        select: false
+    }
 });
 
-userSchema.methods.hashPassword = function () {
-    return bcrypt.hash(this.password, 12)
-        .then(hash => {
-            this.password = hash;
-            return this.save();
-        });
+userSchema.index({
+    'username': 'text',
+    'city': 'text',
+    'country': 'text'
+});
+
+userSchema.methods.hashPassword = async function () {
+    let hash = await bcrypt.hash(this.password, 12);
+    this.password = hash;
+    await this.save();
 };
 
 const User = model('User', userSchema);

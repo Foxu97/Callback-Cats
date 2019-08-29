@@ -17,7 +17,6 @@ const adminAuth = require('./middleware/adminAuth').adminAuth;
 const app = express();
 
 app.use(bodyParser.json());
-
 app.use(passport.initialize());
 
 app.use('/user', userRouter);
@@ -35,7 +34,7 @@ passport.use(new Strategy(passportOptions, function (jwt_payload, done) {
 }));
 
 app.use('/post', passport.authenticate('jwt', { session: false }), postRouter);
-app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, adminRoutes)
+app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, adminRoutes);
 
 mongoose
     .connect(config.url, config.options)
