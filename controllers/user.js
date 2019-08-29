@@ -51,19 +51,21 @@ exports.postUserSignIn = async (req, res, next) => {
     if (!user) return res.status(400).send({
         message: 'Invalid credentials'
     });
+
     if (!user.active) return res.status(400).send({
         message: 'Account has not been yet activated'
     });
+
     let result = await bcrypt.compare(req.body.password, user.password);
     if (!result) return res.status(400).send({
         message: 'Authentication failed'
     });
-    const token = jwt.sign({
-        id: user._id
-    }, process.env.PASSPORT_SECRET, { expiresIn: "1h" });
+
     return res.status(200).send({
         message: 'User has been logged in',
-        jwt: token
+        jwt: jwt.sign({
+            id: user._id
+        }, process.env.PASSPORT_SECRET, { expiresIn: "1h" })
     });
 
 };
@@ -131,6 +133,11 @@ exports.putUpdateProfile = async (req, res, next) => {
     return res.status(200).send({
         message: 'Your profile has been updated'
     });
+}
+
+
+
+exports.addFriend = (req, res, next) => {
     User.findOne({ username: req.body.username })
         .then(requestedUser => {
             if (!requestedUser) {
@@ -170,56 +177,56 @@ exports.putUpdateProfile = async (req, res, next) => {
         })
 }
 exports.acceptFirendsRequest = (req, res, body) => {
-    User.findOne({username: req.body.username})
-    .then((fetchedUser) => {
-        if (!fetchedUser){
-            return res.status(401).send("No user fetched");
-        }
-        if (req.user.incomingFriendsRequests.indexOf(fetchedUser._id) === -1) {
-            return res.status(400).send("You havent got invitation from this user");
-        }
-        addUsersToFriends(req.user, fetchedUser).then(
-            res.status(201).send("You are friends now")
-        )
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).send("Something went wrong");
-    });
+    User.findOne({ username: req.body.username })
+        .then((fetchedUser) => {
+            if (!fetchedUser) {
+                return res.status(401).send("No user fetched");
+            }
+            if (req.user.incomingFriendsRequests.indexOf(fetchedUser._id) === -1) {
+                return res.status(400).send("You havent got invitation from this user");
+            }
+            addUsersToFriends(req.user, fetchedUser).then(
+                res.status(201).send("You are friends now")
+            )
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).send("Something went wrong");
+        });
 
 }
 
 function addUsersToFriends(requestingUser, requestedUser) {
     return new Promise((resolve, reject) => {
         User.findById(requestingUser._id)
-        .then(user => {
-            let index = user.incomingFriendsRequests.indexOf(requestedUser._id);
-            if (index > -1) {
-                user.incomingFriendsRequests.splice(index, 1);
-                user.friendsList.push(requestedUser._id);
-                sendMail("You have new friend!", user.email);
-                return user.save();
-            }
-        })
-        .then(() => {
-            return User.findById(requestedUser._id)
-        })
-        .then(user => {
-            let index = user.outcomingFriendsRequests.indexOf(requestingUser._id)
-            if (index > -1) {
-                user.outcomingFriendsRequests.splice(index, 1);
-                user.friendsList.push(requestingUser._id);
-                sendMail("You have new friend!", user.email);
-                return user.save();
-            }
-        })
-        .then(()=> {
-            resolve();
-        })
-        .catch(err => {
-            console.log(err);
-            reject(err);
-        })
+            .then(user => {
+                let index = user.incomingFriendsRequests.indexOf(requestedUser._id);
+                if (index > -1) {
+                    user.incomingFriendsRequests.splice(index, 1);
+                    user.friendsList.push(requestedUser._id);
+                    sendMail("You have new friend!", user.email);
+                    return user.save();
+                }
+            })
+            .then(() => {
+                return User.findById(requestedUser._id)
+            })
+            .then(user => {
+                let index = user.outcomingFriendsRequests.indexOf(requestingUser._id)
+                if (index > -1) {
+                    user.outcomingFriendsRequests.splice(index, 1);
+                    user.friendsList.push(requestingUser._id);
+                    sendMail("You have new friend!", user.email);
+                    return user.save();
+                }
+            })
+            .then(() => {
+                resolve();
+            })
+            .catch(err => {
+                console.log(err);
+                reject(err);
+            })
     });
 }
 
@@ -245,7 +252,7 @@ exports.getOutcomingRequests = (req, res, next) => {
 exports.deleteFriend = (req, res, next) => {
     User.findOne({ username: req.body.username })
         .then(userToDelete => {
-            if(!userToDelete){
+            if (!userToDelete) {
                 throw new Error("No user fetched");
             }
             let index = req.user.friendsList.indexOf(userToDelete._id);
@@ -321,11 +328,12 @@ exports.getViewProfile = async (req, res, next) => {
 
 exports.getSearchUsers = async (req, res, next) => {
     const phrase = req.query.phrase;
+    console.log(phrase)
     let result = await User.find(
         { '$text': { '$search': phrase }, visible: true },
-        { score: { $meta: 'textScore' } }
-    )
+        { score: { $meta: 'textScore' } })
         .sort({ score: { $meta: 'textScore' } })
         .select('-__v -email');
+
     res.send(result);
 };

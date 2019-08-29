@@ -3,7 +3,7 @@ const { validationResult } = require('express-validator');
 const jwt = require("jsonwebtoken");
 
 exports.postAddPost = (req, res, next) => {
-    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
+    const loggedID = req.user._id;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).send(errors);

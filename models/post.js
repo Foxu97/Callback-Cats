@@ -25,7 +25,7 @@ const postSchema = new Schema({
         ref: 'User'
     }
 });
-
+//buildurl, 
 const Post = model('Post', postSchema);
 
 module.exports = Post;

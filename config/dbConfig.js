@@ -2,6 +2,7 @@ module.exports = {
     url: process.env.MONGOOSE_URL,
 
     options: {
-        useNewUrlParser: true
+        useNewUrlParser: true,
+        useCreateIndex: true
     }
 };

@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 
 const userSchema = new Schema({
     username: { type: String },
+    name: { type: String },
+    surname: { type: String },
     email: { type: String },
     password: {
         type: String,
@@ -25,7 +27,7 @@ const userSchema = new Schema({
     city: { type: String },
     friendsList: { type: Array },
     incomingFriendsRequests: { type: Array },
-    outcomingFriendsRequests: { type: Array } //have to think if it is necessary
+    outcomingFriendsRequests: { type: Array }, //have to think if it is necessary
     visible: {
         type: Boolean,
         default: true,

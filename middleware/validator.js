@@ -12,7 +12,7 @@ exports.registrationValidation = [
         });
     }),
     body('username').custom(value => {
-        return User.findOne({username: value}).then(user => {
+        return User.findOne({ username: value }).then(user => {
             if (user) {
                 return Promise.reject("This username is already in use");
             }
@@ -46,7 +46,7 @@ exports.updateValidation = [
         });
     }),
     body('username').optional().custom(value => {
-        return User.findOne({username: value}).then(user => {
+        return User.findOne({ username: value }).then(user => {
             if (user) {
                 return Promise.reject("This username is already in use");
             }
