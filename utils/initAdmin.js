@@ -10,4 +10,4 @@ exports.initAdmin = () => {
         .then(() => {
             console.log('Created DB and default admin');
         });
-}
+};
