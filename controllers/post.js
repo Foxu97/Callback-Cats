@@ -1,72 +1,95 @@
 const Post = require('../models/post');
-const { validationResult } = require('express-validator');
 const jwt = require("jsonwebtoken");
+const validationHandle = require('../utils/validationHandle');
+const _ = require('lodash');
 
-exports.postAddPost = (req, res, next) => {
-    const loggedID = req.user._id;
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(422).send(errors);
-    }
-    req.body.createdBy = loggedID;
-    let newPost = new Post(req.body);
-    newPost.save()
-        .then(() => {
-            res.status(200).send('Post has been added');
-        });
+exports.postAddPost = async (req, res, next) => {
+    if (validationHandle(req, res)) return;
+
+    let newPost = new Post({
+        title: req.body.title,
+        description: req.body.description,
+        privacyLevel: req.body.privacyLevel,
+        tags: req.body.tags,
+        createdBy: req.user._id
+    });
+
+    await newPost.save();
+
+    res.status(200).send({
+        message: 'Post has been added'
+    });
 };
 
-exports.getViewMyPosts = (req, res, next) => {
-    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
-    Post.find({ createdBy: loggedID })
-        .then(posts => {
-            res.status(200).send(posts);
-        });
+exports.getViewMyPosts = async (req, res, next) => {
+    let posts = await Post.find({ createdBy: req.user._id });
+
+    res.status(200).send({
+        posts
+    });
 };
 
-exports.getViewPost = (req, res, next) => {
-    const postID = req.params.id;
-    Post.findById(postID)
-        .then(post => {
-            res.status(200).send(post);
-        });
-};
+exports.getViewPost = async (req, res, next) => {
+    let post = await Post.findById(req.params.id);
 
-exports.putUpdatePost = (req, res, next) => {
-    const postID = req.params.id;
-    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
-    Post.updateOne({ _id: postID, createdBy: loggedID }, req.body)
-        .then((docs) => {
-            if (docs.n === 0) {
-                return res.status(400).send('No posts found');
-            }
-            res.status(200).send('Post updated');
-        });
-};
+    if (post.createdBy.equals(req.user._id)) return res.status(200).send({
+        post
+    });
 
-exports.deletePost = (req, res, next) => {
-    const postID = req.params.id;
-    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
-    Post.deleteOne({ _id: postID, createdBy: loggedID })
-        .then((docs) => {
-            if (docs.n === 0) {
-                return res.status(400).send('No posts found');
-            }
-            res.status(200).send('Post deleted');
+    if (post.state === 'published') {
+        if (post.privacyLevel === 'public') return res.status(200).send({
+            post
         });
-};
 
-exports.getPublishPost = (req, res, next) => {
-    const postID = req.params.id;
-    const loggedID = jwt.decode(req.get('Authorization').slice(4)).id;
-    Post.findOne({ _id: postID, createdBy: loggedID })
-        .then((post) => {
-            post.state = 'published';
-            post.save()
-                .then(() => {
-                    res.status(200).send('Post published');
+        if (post.privacyLevel === 'friendsOnly') {
+            for (let friend of req.user.friendsList) {
+                if (post.createdBy.equals(friend)) return res.status(200).send({
+                    post
                 });
-        });
+            }
+        }
+    }
+
+    res.status(400).send({
+        message: 'Post has been not found or you have no permission to view it'
+    });
+};
+
+exports.putUpdatePost = async (req, res, next) => {
+    if (validationHandle(req, res)) return;
+
+    let result = await Post.updateOne({ _id: req.params.id, createdBy: req.user._id },
+        _.pick(req.body, ['title', 'description', 'privacyLevel', 'tags']));
+
+    if (result.n === 0) return res.status(400).send({
+        message: 'No post found or you have no permission to update it'
+    });
+
+    res.status(200).send({
+        message: 'Post has been updated'
+    });
+};
+
+exports.deletePost = async (req, res, next) => {
+    let result = await Post.deleteOne({ _id: req.params.id, createdBy: req.body._id });
+
+    if (result.n === 0) return res.status(400).send({
+        message: 'No post found or you have no permission to delete it'
+    });
+
+    res.status(200).send({
+        message: 'Post has been deleted'
+    });
+};
+
+exports.getPublishPost = async (req, res, next) => {
+    let result = await Post.findByIdAndUpdate({ _id: req.params.id, createdBy: req.user.id }, { state: 'published' });
+
+    if (!result) return res.status(400).send({
+        message: 'No post has been found or you have no permission to publish it'
+    });
+
+    res.status(200).send('Post published');
 };
 
 exports.searchPosts = (req, res, next) => {

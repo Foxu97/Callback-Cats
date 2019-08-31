@@ -9,7 +9,10 @@ const postSchema = new Schema({
     // file: {
 
     // },
-    privacyLevel: { type: String, },
+    privacyLevel: {
+        type: String,
+        enum: ['public', 'friendsOnly', 'private'],
+    },
     createdAt: {
         type: Date,
         default: Date.now

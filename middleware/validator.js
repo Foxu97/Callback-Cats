@@ -25,8 +25,15 @@ exports.registrationValidation = [
 exports.postValidation = [
     body('description').exists(),
     body('title').exists(),
-    body('privacyLevel').exists(),
+    body('privacyLevel').isIn(['public', 'friendsOnly', 'private']),
     body('tags').custom(value => {
+        return value.length < 11;
+    }).withMessage('Too many tags, maximum number is 10')
+];
+
+exports.postUpdateValidation = [
+    body('privacyLevel').optional().isIn(['public', 'friendsOnly', 'private']),
+    body('tags').optional().custom(value => {
         return value.length < 11;
     }).withMessage('Too many tags, maximum number is 10')
 ];

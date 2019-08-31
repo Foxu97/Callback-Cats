@@ -43,6 +43,6 @@ mongoose
         return initAdmin();
     })
     .then(() => {
-        app.listen(9092, () => console.log('Web server listening on port here 9092.'));
+        app.listen(9092, () => console.log('Web server listening on port 9092.'));
     })
     .catch(err => console.log(err));
