@@ -28,7 +28,13 @@ const postSchema = new Schema({
         ref: 'User'
     }
 });
-//buildurl, 
+
+postSchema.index({
+    'title': 'text',
+    'description': 'text',
+    'tags': 'text'
+});
+
 const Post = model('Post', postSchema);
 
 module.exports = Post;

@@ -157,7 +157,6 @@ exports.getViewProfile = async (req, res, next) => {
 
 exports.getSearchUsers = async (req, res, next) => {
     const phrase = req.query.phrase;
-    console.log(phrase)
     let result = await User.find(
         { '$text': { '$search': phrase }, visible: true },
         { score: { $meta: 'textScore' } })
