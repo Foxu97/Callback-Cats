@@ -34,6 +34,7 @@ exports.postRegisterUser = async (req, res, next) => {
 
 exports.getAccountActivation = async (req, res, next) => {
     let user = await User.findOne({ activationGUID: req.params.activationGUID });
+
     if (!user) return res.status(400).send({
         message: 'No user with that activation ID found'
     });
@@ -161,7 +162,7 @@ exports.getSearchUsers = async (req, res, next) => {
         { '$text': { '$search': phrase }, visible: true },
         { score: { $meta: 'textScore' } })
         .sort({ score: { $meta: 'textScore' } })
-        .select('-__v -email');
+        .select('-__v -email -incomingFriendsRequests -outcomingFriendsRequests');
 
     res.send(result);
 };

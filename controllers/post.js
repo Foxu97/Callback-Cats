@@ -30,28 +30,24 @@ exports.getViewMyPosts = async (req, res, next) => {
 };
 
 exports.getViewPost = async (req, res, next) => {
-    let post = await Post.findById(req.params.id);
-
-    if (post.createdBy.equals(req.user._id)) return res.status(200).send({
-        post
+    let result = await Post.find({
+        $and: [
+            { _id: req.params.id },
+            {
+                $or: [
+                    { createdBy: req.user._id },
+                    { state: 'published', privacyLevel: 'public' },
+                    { privacyLevel: 'friendsOnly', state: 'published', createdBy: { $in: req.user.friendsList } }
+                ]
+            }]
     });
 
-    if (post.state === 'published') {
-        if (post.privacyLevel === 'public') return res.status(200).send({
-            post
-        });
+    if (result.length === 0) res.status(400).send({
+        message: 'No post has been found or you have no permission to view it'
+    });
 
-        if (post.privacyLevel === 'friendsOnly') {
-            for (let friend of req.user.friendsList) {
-                if (post.createdBy.equals(friend)) return res.status(200).send({
-                    post
-                });
-            }
-        }
-    }
-
-    res.status(400).send({
-        message: 'Post has been not found or you have no permission to view it'
+    res.status(200).send({
+        post: result
     });
 };
 
@@ -101,7 +97,7 @@ exports.searchPosts = async (req, res, next) => {
                 $or: [
                     { createdBy: req.user._id },
                     { state: 'published', privacyLevel: 'public' },
-                    { privacyLevel: 'friendsOnly', state: 'published', createdBy: { $in: req.user.friendsList } } // ZOBACZYC CO TO INDEXY, JAK DZIALAJA
+                    { privacyLevel: 'friendsOnly', state: 'published', createdBy: { $in: req.user.friendsList } }
                 ]
             }]
     });

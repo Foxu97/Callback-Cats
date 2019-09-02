@@ -3,12 +3,6 @@ const { Schema, model } = require('mongoose');
 const postSchema = new Schema({
     description: { type: String, },
     title: { type: String, },
-    // photo: {
-
-    // },
-    // file: {
-
-    // },
     privacyLevel: {
         type: String,
         enum: ['public', 'friendsOnly', 'private'],
