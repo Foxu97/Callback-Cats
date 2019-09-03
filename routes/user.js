@@ -5,15 +5,13 @@ const validation = require('../middleware/validator');
 
 router.post('/register', validation.registrationValidation, userController.postRegisterUser);
 
-router.post('/signin', userController.postUserSignIn);
-
 router.get('/activation/:activationGUID', userController.getAccountActivation);
+
+router.post('/signin', userController.postUserSignIn);
 
 router.post('/forgot', userController.postForgotPassword);
 
 router.post('/reset/:resetGUID', validation.resetValidation, userController.postResetPassword);
-
-//USER CRUD 
 
 //user can update his profile
 router.put('/update', passport.authenticate('jwt', { session: false }), validation.updateValidation, userController.putUpdateProfile);

@@ -12,7 +12,10 @@ const userSchema = new Schema({
     },
     birthdate: { type: Date },
     gender: { type: String },
-    role: { type: String },
+    role: {
+        type: String,
+        default: 'user'
+    },
     activationGUID: {
         type: String,
         select: false
@@ -27,7 +30,7 @@ const userSchema = new Schema({
     city: { type: String },
     friendsList: { type: Array },
     incomingFriendsRequests: { type: Array },
-    outcomingFriendsRequests: { type: Array }, //have to think if it is necessary
+    outcomingFriendsRequests: { type: Array },
     visible: {
         type: Boolean,
         default: true,

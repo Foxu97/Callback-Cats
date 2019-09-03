@@ -3,13 +3,10 @@ const { Schema, model } = require('mongoose');
 const postSchema = new Schema({
     description: { type: String, },
     title: { type: String, },
-    // photo: {
-
-    // },
-    // file: {
-
-    // },
-    privacyLevel: { type: String, },
+    privacyLevel: {
+        type: String,
+        enum: ['public', 'friendsOnly', 'private'],
+    },
     createdAt: {
         type: Date,
         default: Date.now
@@ -25,7 +22,13 @@ const postSchema = new Schema({
         ref: 'User'
     }
 });
-//buildurl, 
+
+postSchema.index({
+    'title': 'text',
+    'description': 'text',
+    'tags': 'text'
+});
+
 const Post = model('Post', postSchema);
 
 module.exports = Post;

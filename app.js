@@ -3,12 +3,12 @@ const dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
+const { Strategy } = require('passport-jwt');
+
 const config = require('./config/dbConfig');
 const User = require('./models/user');
 const initAdmin = require('./utils/initAdmin').initAdmin;
 const passportOptions = require('./config/passportConfig').options;
-
-const { Strategy } = require('passport-jwt');
 const userRouter = require('./routes/user');
 const postRouter = require('./routes/post');
 const adminRoutes = require('./routes/admin');
@@ -43,6 +43,6 @@ mongoose
         return initAdmin();
     })
     .then(() => {
-        app.listen(9092, () => console.log('Web server listening on port here 9092.'));
+        app.listen(9092, () => console.log('Web server listening on port 9092.'));
     })
     .catch(err => console.log(err));
