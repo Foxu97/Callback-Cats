@@ -12,6 +12,7 @@ router.get('/outcomingRequests', friendsController.getOutcomingRequests);
 router.put('/deleteFriend', friendsController.deleteFriend)
 
 router.put('/addFriend', friendsController.addFriend);
+
 //for development only
 router.get('/clearArrays', friendsController.clearArrays);
 //

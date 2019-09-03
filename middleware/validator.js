@@ -18,6 +18,8 @@ exports.registrationValidation = [
             });
         }),
     body('username')
+        .exists(),
+    body('username')
         .custom(value => {
             return User.findOne({ username: value }).then(user => {
                 if (user) {
