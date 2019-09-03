@@ -7,7 +7,7 @@ router.get('/friendsList', friendsController.getFriendsList);
 
 router.get('/incomingRequests', friendsController.getIncomingRequests);
 
-router.get('/outcomingRequests', friendsController.getOutcomingRequests);
+router.get('/sentRequests', friendsController.getSentRequests);
 
 router.put('/deleteFriend', friendsController.deleteFriend)
 

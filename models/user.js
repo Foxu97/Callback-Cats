@@ -28,9 +28,9 @@ const userSchema = new Schema({
     bio: { type: String },
     country: { type: String },
     city: { type: String },
-    friendsList: { type: Array },
-    incomingFriendsRequests: { type: Array },
-    outcomingFriendsRequests: { type: Array },
+    friendsList: { type: Array, ref: 'User' },
+    incomingFriendsRequests: { type: Array, ref: 'User' },
+    sentFriendsRequests: { type: Array, ref: 'User' },
     visible: {
         type: Boolean,
         default: true,

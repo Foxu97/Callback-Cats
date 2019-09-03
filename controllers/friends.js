@@ -2,9 +2,9 @@ const User = require('../models/user');
 const sendMail = require('../utils/sendMail');
 
 exports.addFriend = async (req, res, next) => {
-    let requestedUser = await User.findOne({ username: req.body.username});
+    let requestedUser = await User.findOne({ username: req.body.username });
 
-    if(!requestedUser){
+    if (!requestedUser) {
         return res.status(404).send("User not found");
     }
     if (req.user.incomingFriendsRequests.indexOf(requestedUser._id) > -1) {
@@ -23,27 +23,27 @@ exports.addFriend = async (req, res, next) => {
     requestedUser.incomingFriendsRequests.push(req.user._id);
     await requestedUser.save();
 
-    let user = await User.findOne({ _id: req.user._id});
-    user.outcomingFriendsRequests.push(requestedUser._id);
+    let user = await User.findOne({ _id: req.user._id });
+    user.sentFriendsRequests.push(requestedUser._id);
     await user.save();
     sendMail("You have new friends request!", requestedUser.email);
     res.status(200).send("Sended friend request");
 }
-exports.acceptFirendsRequest = async (req, res, next) => { 
+exports.acceptFirendsRequest = async (req, res, next) => {
     try {
         let user = await User.findOne({ username: req.body.username });
-    
-        if(!user){
+
+        if (!user) {
             return res.status(401).send("No user fetched");
         }
-        if(req.user.incomingFriendsRequests.indexOf(user._id) === -1){
+        if (req.user.incomingFriendsRequests.indexOf(user._id) === -1) {
             return res.status(400).send("You havent got invitation from this user");
         }
         await addUsersToFriends(req.user, user);
         res.status(201).send("You are friends now");
 
     }
-    catch(err) {
+    catch (err) {
         res.status(500).send("Something went wrong");
     }
 }
@@ -51,29 +51,47 @@ exports.acceptFirendsRequest = async (req, res, next) => {
 
 
 
-exports.getFriendsList = (req, res, next) => {
+exports.getFriendsList = async (req, res, next) => {
     if (req.user.friendsList.length === 0) {
         return res.status(200).send("You havent got any friends");
     }
-    getUsersNamesArray(req.user.friendsList, res);
+    let fetchedFriendsList = await User.findOne({ _id: req.user.id })
+        .populate('friendsList');
+    const friends = [];
+    fetchedFriendsList.friendsList.forEach(friend => {
+        friends.push(friend.username);
+    })
+    res.send(friends);
 }
-exports.getIncomingRequests = (req, res, next) => {
+exports.getIncomingRequests = async (req, res, next) => {
     if (req.user.incomingFriendsRequests.length === 0) {
         return res.status(200).send("You havent got any incoming requests");
     }
-    getUsersNamesArray(req.user.incomingFriendsRequests, res);
+    let fetchedIncomingList = await User.findOne({ _id: req.user.id })
+        .populate('incomingFriendsRequests');
+    const incomingRequests = [];
+    fetchedIncomingList.incomingFriendsRequests.forEach(user => {
+        incomingRequests.push(user.username);
+    });
+    res.send(incomingRequests);
 }
-exports.getOutcomingRequests = (req, res, next) => {
-    if (req.user.outcomingFriendsRequests.length === 0) {
+exports.getSentRequests = async (req, res, next) => {
+    if (req.user.sentFriendsRequests.length === 0) {
         return res.status(200).send("You havent got any outcoming requests");
     }
-    getUsersNamesArray(req.user.outcomingFriendsRequests, res);
+    let fetchedSentList = await User.findOne({ _id: req.user.id })
+        .populate('sentFriendsRequests');
+    const sentRequests = [];
+    fetchedSentList.sentFriendsRequests.forEach(user => {
+        sentRequests.push(user.username);
+    });
+    res.send(sentRequests);
 }
 
 exports.deleteFriend = async (req, res, next) => {
     try {
         let userToDelete = await User.findOne({ username: req.body.username });
-        if (!userToDelete){
+        if (!userToDelete) {
             return res.status(404).send("User not found");
         }
         let UserToDeleteIndex = req.user.friendsList.indexOf(userToDelete._id);
@@ -81,7 +99,7 @@ exports.deleteFriend = async (req, res, next) => {
             req.user.friendsList.splice(UserToDeleteIndex, 1);
             await req.user.save();
             let userIndex = userToDelete.friendsList.indexOf(req.user._id);
-            if (userIndex > -1){
+            if (userIndex > -1) {
                 userToDelete.friendsList.splice(userIndex, 1);
                 await userToDelete.save();
             }
@@ -90,7 +108,7 @@ exports.deleteFriend = async (req, res, next) => {
             return res.status(400).send("This user is not your friend");
         }
     }
-    catch(err) {
+    catch (err) {
         res.status(500).send("Something went wrong");
     }
 
@@ -112,9 +130,9 @@ function addUsersToFriends(requestingUser, requestedUser) {
                 return User.findById(requestedUser._id)
             })
             .then(user => {
-                let index = user.outcomingFriendsRequests.indexOf(requestingUser._id)
+                let index = user.sentFriendsRequests.indexOf(requestingUser._id)
                 if (index > -1) {
-                    user.outcomingFriendsRequests.splice(index, 1);
+                    user.sentFriendsRequests.splice(index, 1);
                     user.friendsList.push(requestingUser._id);
                     sendMail("You have new friend!", user.email);
                     return user.save();
@@ -130,14 +148,6 @@ function addUsersToFriends(requestingUser, requestedUser) {
     });
 }
 
-async function getUsersNamesArray(array, res) {
-    const users = [];
-    for (const id of array) {
-        let user = await User.findById(id); // it can be improved by making one db request
-        users.push(user.username);
-    }
-    res.status(200).json(users);
-}
 
 // for development only !!
 exports.clearArrays = (req, res, next) => {
@@ -146,7 +156,7 @@ exports.clearArrays = (req, res, next) => {
             users.forEach(user => {
                 user.friendsList = []
                 user.incomingFriendsRequests = []
-                user.outcomingFriendsRequests = []
+                user.sentFriendsRequests = []
                 user.save();
             })
             res.status(200).send("all arrays clear now");

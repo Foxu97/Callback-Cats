@@ -162,7 +162,7 @@ exports.getSearchUsers = async (req, res, next) => {
         { '$text': { '$search': phrase }, visible: true },
         { score: { $meta: 'textScore' } })
         .sort({ score: { $meta: 'textScore' } })
-        .select('-__v -email -incomingFriendsRequests -outcomingFriendsRequests');
+        .select('-__v -email -incomingFriendsRequests -sentFriendsRequests');
 
     res.send(result);
 };
