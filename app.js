@@ -3,13 +3,12 @@ const dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
-const { Strategy } = require('passport-jwt');
 
+const passportConfig = require('./config/passportConfig');
 const config = require('./config/dbConfig');
-const User = require('./models/user');
 const initAdmin = require('./utils/initAdmin').initAdmin;
-const passportOptions = require('./config/passportConfig').options;
 const userRouter = require('./routes/user');
+const authRouter = require('./routes/auth');
 const postRouter = require('./routes/post');
 const adminRoutes = require('./routes/admin');
 const friendsRouter = require('./routes/friends');
@@ -20,19 +19,8 @@ const app = express();
 app.use(bodyParser.json());
 app.use(passport.initialize());
 
-passport.use(new Strategy(passportOptions, function (jwt_payload, done) {
-    User.findById(jwt_payload.id, function (err, user) {
-        if (err) {
-            return done(err, false);
-        } if (user) {
-            return done(null, user);
-        } else {
-            return done(null, false);
-        }
-    });
-}));
-
 app.use('/user', userRouter);
+app.use('/auth', authRouter);
 app.use('/friends', passport.authenticate('jwt', { session: false }), friendsRouter);
 app.use('/post', passport.authenticate('jwt', { session: false }), postRouter);
 app.use('/admin', passport.authenticate('jwt', { session: false }), adminAuth, adminRoutes);

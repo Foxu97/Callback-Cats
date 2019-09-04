@@ -35,7 +35,8 @@ const userSchema = new Schema({
         type: Boolean,
         default: true,
         select: false
-    }
+    },
+    googleID: { type: String }
 });
 
 userSchema.index({
