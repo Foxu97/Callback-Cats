@@ -61,7 +61,6 @@ exports.postUserSignIn = async (req, res, next) => {
     if (!result) return res.status(400).send({
         message: 'Authentication failed'
     });
-
     return res.status(200).send({
         message: 'User has been logged in',
         jwt: jwt.sign({

@@ -9,7 +9,7 @@ router.get('/incomingRequests', friendsController.getIncomingRequests);
 
 router.get('/sentRequests', friendsController.getSentRequests);
 
-router.put('/deleteFriend', friendsController.deleteFriend)
+router.put('/deleteFriend', friendsController.deleteFriend);
 
 router.put('/addFriend', friendsController.addFriend);
 
