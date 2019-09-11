@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import SignIn from './SignIn';
 
 export default class Login extends Component {
     state = {
@@ -7,7 +8,7 @@ export default class Login extends Component {
         password: ''
     }
 
-    change = (e) => {
+    handleChange = (e) => {
         this.setState({
             [e.target.name]: e.target.value
         });
@@ -28,11 +29,7 @@ export default class Login extends Component {
 
     render() {
         return (
-            <form onSubmit={this.submitLogin}>
-                <p><label>E-mail</label><input type="text" name="email" onChange={this.change} value={this.state.email}></input></p>
-                <p><label>Password</label><input type="password" name="password" onChange={this.change} value={this.state.password}></input></p>
-                <button type="submit">Submit</button>
-            </form>
+            <SignIn handleChange={this.handleChange} submitLogin={this.submitLogin} state={this.state}></SignIn>
         )
     }
 }
