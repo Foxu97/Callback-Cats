@@ -1,0 +1,29 @@
+.Post {
+    font-family: 'Roboto', sans-serif;
+    border-radius: 3px;
+    border: 1px solid #e6e6e6;
+    background-color: #fff;
+    margin-bottom: 20px;
+    margin-left : 35%;
+    margin-right: 35%;
+    margin-top: 25px;
+    width: 30%;
+    padding-left: 20px;
+    padding-bottom: 15px;
+  }
+  .Post-user {
+    display: flex;
+    padding-top: 15px;
+    margin-bottom: 14px;
+    align-items: center;
+  }
+  .Post-user-nickname {
+    font-weight: bold;
+  }
+  .Post-title {
+    font-size: 19px;
+    text-decoration: underline;
+  }
+  .Post-content {
+    font-size: 15px;
+  }

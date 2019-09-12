@@ -29,7 +29,7 @@ exports.postRegisterUser = async (req, res, next) => {
 
     const activationLink = process.env.DOMAIN + '/user/activation/' + user.activationGUID;
     sendMail(activationLink, user.email);
-    res.status(200).send('User created successfuly');
+    res.status(200).send('User created successfully ' + activationLink);
 };
 
 exports.getAccountActivation = async (req, res, next) => {

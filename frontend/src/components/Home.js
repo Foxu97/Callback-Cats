@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import EmailVerification from './EmailVerification';
+import ActivityFeed from './ActivityFeed';
 import SignUp from './SignUp';
 
 export default class Home extends Component {
@@ -17,9 +18,7 @@ export default class Home extends Component {
     componentDidMount() {
         const jwt = localStorage.getItem('jwt-token');
         if (jwt) {
-            axios.get('/user/profile', { headers: { Authorization: `JWT ${jwt}` } }).then(res => {
-                this.setState({ user: res.data.username });
-            })
+            this.setState({ user: jwt });
         }
     }
 
@@ -56,7 +55,7 @@ export default class Home extends Component {
             )
         }
         return (
-            <div>Witaj {this.state.user}</div>
+            <ActivityFeed></ActivityFeed>
         )
     }
 }
