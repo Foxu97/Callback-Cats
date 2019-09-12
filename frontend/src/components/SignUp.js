@@ -43,7 +43,7 @@ const useStyles = makeStyles(theme => ({
     },
 }));
 
-export default function SignUp() {
+export default function SignUp(props) {
     const classes = useStyles();
 
     let [typ, setType] = useState('text');
@@ -61,15 +61,16 @@ export default function SignUp() {
                     <LockOutlinedIcon />
                 </Avatar>
                 <Typography component="h1" variant="h4">
-                    Ceate a new account
+                    Create a new account
                 </Typography>
                 <Typography component="h2" variant="h6">
                     And start sharing right now!
                 </Typography>
-                <form className={classes.form} noValidate>
+                <form className={classes.form} onSubmit={props.handleSubmit}>
                     <Grid container spacing={2}>
                         <Grid item xs={12}>
                             <TextField
+                                onChange={props.handleChange}
                                 autoComplete="username"
                                 name="username"
                                 variant="outlined"
@@ -82,6 +83,7 @@ export default function SignUp() {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
+                                onChange={props.handleChange}
                                 variant="outlined"
                                 required
                                 fullWidth
@@ -93,6 +95,7 @@ export default function SignUp() {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
+                                onChange={props.handleChange}
                                 variant="outlined"
                                 required
                                 fullWidth
@@ -105,6 +108,7 @@ export default function SignUp() {
                         </Grid>
                         <Grid item xs={12}>
                             <TextField
+                                onChange={props.handleChange}
                                 variant="outlined"
                                 required
                                 fullWidth
@@ -121,15 +125,16 @@ export default function SignUp() {
                             <FormControl component="fieldset" className={classes.formControl}>
                                 <FormLabel component="legend">Gender</FormLabel>
                                 <RadioGroup aria-label="gender" name="gender1" value={value} style={{ display: 'block' }} onChange={handleChange}>
-                                    <FormControlLabel value="female" control={<Radio />} label="Female" />
-                                    <FormControlLabel value="male" control={<Radio />} label="Male" />
+                                    <FormControlLabel name="gender" value="female" control={<Radio />} label="Female" onChange={props.handleChange} />
+                                    <FormControlLabel name="gender" value="male" control={<Radio />} label="Male" onChange={props.handleChange} />
                                 </RadioGroup>
                             </FormControl>
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                onChange={props.handleChange}
                                 autoComplete="fname"
-                                name="firstName"
+                                name="name"
                                 variant="outlined"
                                 fullWidth
                                 id="firstName"
@@ -139,6 +144,7 @@ export default function SignUp() {
                         </Grid>
                         <Grid item xs={12} sm={6}>
                             <TextField
+                                onChange={props.handleChange}
                                 variant="outlined"
                                 fullWidth
                                 id="surname"

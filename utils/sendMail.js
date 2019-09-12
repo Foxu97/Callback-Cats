@@ -6,8 +6,8 @@ const sendMail = (content, to) => {
     const msg = {
         to: to,
         from: 'helloworld199797@gmail.com',
-        subject: 'Callback Cats',
-        text: content,
+        subject: 'ShareIt',
+        html: '<h1>Welcome to ShareIt!<h1><br><p>To start using our site just click the link below</p> ' + content,
     };
     sgMail.send(msg);
 };

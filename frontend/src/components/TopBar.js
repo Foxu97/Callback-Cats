@@ -22,7 +22,6 @@ const useStyles = makeStyles(theme => ({
 
 export default function MenuAppBar() {
     const classes = useStyles();
-    const [auth, setAuth] = React.useState(true);
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
 
@@ -39,9 +38,9 @@ export default function MenuAppBar() {
             <AppBar position="static">
                 <Toolbar>
                     <Typography variant="h6" className={classes.title}>
-                        ShareIt
-          </Typography>
-                    {auth && (
+                        <a href="/" style={{ textDecoration: 'none', color: 'white' }}>ShareIt</a>
+                    </Typography>
+                    {localStorage.getItem('jwt-token') && (
                         <div>
                             <IconButton
                                 aria-label="account of current user"
