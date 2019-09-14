@@ -27,9 +27,9 @@ exports.postRegisterUser = async (req, res, next) => {
 
     await user.hashPassword();
 
-    const activationLink = 'http://localhost:9092/user/activation/' + user.activationGUID;
+    const activationLink = process.env.DOMAIN + '/user/activation/' + user.activationGUID;
     sendMail(activationLink, user.email);
-    res.status(200).send('User created successfuly ' + activationLink);
+    res.status(200).send('User created successfully ' + activationLink);
 };
 
 exports.getAccountActivation = async (req, res, next) => {
@@ -61,7 +61,6 @@ exports.postUserSignIn = async (req, res, next) => {
     if (!result) return res.status(400).send({
         message: 'Authentication failed'
     });
-
     return res.status(200).send({
         message: 'User has been logged in',
         jwt: jwt.sign({
@@ -81,10 +80,10 @@ exports.postForgotPassword = async (req, res, next) => {
 
     let resetToken = new ResetToken({ userId: user._id, token: uuidv1() });
     await resetToken.save();
-    let resetLink = 'http://localhost:9092/user/reset/' + resetToken.token;
+    let resetLink = process.env.DOMAIN + '/user/reset/' + resetToken.token;
     sendMail(resetLink, user.email);
     return res.status(200).send({
-        message: 'Password reset link has been sent on provided mail ' + resetLink
+        message: 'Password reset link has been sent on provided mail '
     });
 };
 

@@ -118,7 +118,7 @@ exports.getAllPosts = async (req, res, next) => {
             { state: 'published', privacyLevel: 'public' },
             { privacyLevel: 'friendsOnly', state: 'published', createdBy: { $in: req.user.friendsList } }
         ]
-    });
+    }).populate('createdBy');
 
     if (result.length === 0) return res.status(400).send({
         message: 'No posts found'
