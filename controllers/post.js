@@ -5,13 +5,13 @@ const _ = require('lodash');
 
 exports.postAddPost = async (req, res, next) => {
     if (validationHandle(req, res)) return;
-
     let newPost = new Post({
         title: req.body.title,
         description: req.body.description,
         privacyLevel: req.body.privacyLevel,
         tags: req.body.tags,
-        createdBy: req.user._id
+        createdBy: req.user._id,
+        photo: req.file.filename
     });
 
     await newPost.save();

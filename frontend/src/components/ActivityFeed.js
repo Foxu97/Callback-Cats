@@ -11,7 +11,7 @@ export default class Home extends Component {
 
     renderPosts(posts) {
         for (let post of posts) {
-            this.setState({ items: [...this.state.items, <Post title={post.title} description={post.description} name={post.createdBy.username}></Post>] })
+            this.setState({ items: [...this.state.items, <Post photo={post.photo} title={post.title} description={post.description} name={post.createdBy.username} avatar={post.createdBy.avatar}></Post>] })
         }
     }
 

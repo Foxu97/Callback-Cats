@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import AccountCircle from '@material-ui/icons/AccountCircle';
 import MenuItem from '@material-ui/core/MenuItem';
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import Menu from '@material-ui/core/Menu';
 
 const useStyles = makeStyles(theme => ({
@@ -33,6 +34,11 @@ export default function MenuAppBar() {
         setAnchorEl(null);
     }
 
+    function logOut() {
+        localStorage.removeItem('jwt-token');
+        window.location.reload();
+    }
+
     return (
         <div className={classes.root}>
             <AppBar position="static">
@@ -50,6 +56,12 @@ export default function MenuAppBar() {
                                 color="inherit"
                             >
                                 <AccountCircle />
+                            </IconButton>
+                            <IconButton
+                                color="inherit"
+                                onClick={logOut}
+                            >
+                                <ExitToAppIcon />
                             </IconButton>
                             <Menu
                                 id="menu-appbar"

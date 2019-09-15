@@ -7,6 +7,8 @@ const uuidv1 = require('uuid/v1');
 const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const _ = require('lodash');
+const fs = require('fs');
+const path = require('path');
 
 
 exports.postRegisterUser = async (req, res, next) => {
@@ -65,7 +67,7 @@ exports.postUserSignIn = async (req, res, next) => {
         message: 'User has been logged in',
         jwt: jwt.sign({
             id: user._id
-        }, process.env.PASSPORT_SECRET, { expiresIn: "1h" })
+        }, process.env.PASSPORT_SECRET)
     });
 
 };
@@ -116,7 +118,7 @@ exports.postResetPassword = async (req, res, next) => {
 
 exports.putUpdateProfile = async (req, res, next) => {
     if (validationHandle(req, res)) return;
-
+    console.log(req.body)
     let result = await User.findByIdAndUpdate(req.user._id, _.pick(req.body, ['username', 'email', 'password', 'birthdate', 'gender', 'bio', 'country', 'city']));
 
     if (!result) {
@@ -164,4 +166,32 @@ exports.getSearchUsers = async (req, res, next) => {
         .select('-__v -email -incomingFriendsRequests -sentFriendsRequests');
 
     res.send(result);
+};
+
+exports.putSetAvatar = async (req, res, next) => {
+    if (req.user.avatar !== 'avatar-default.jpeg') {
+        const avatarsPath = path.join(__dirname, '..', 'public/users', req.user.avatar);
+        fs.access(avatarsPath, (err) => {
+            if (err) {
+                return console.log(err);
+            }
+            fs.unlink(avatarsPath, (err) => {
+                if (err) {
+                    return console.log(err)
+                }
+            });
+        });
+    }
+
+    let result = await User.findByIdAndUpdate(req.user._id, { avatar: req.file.filename });
+
+    if (!result) {
+        return res.status(400).send({
+            message: 'Updating failed'
+        });
+    }
+
+    return res.status(200).send({
+        message: 'Your avatar has been set'
+    });
 };

@@ -18,6 +18,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(passport.initialize());
+app.use(express.static('public'))
 
 app.use('/user', userRouter);
 app.use('/auth', authRouter);

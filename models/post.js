@@ -20,6 +20,9 @@ const postSchema = new Schema({
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: 'User'
+    },
+    photo: {
+        type: String,
     }
 });
 

@@ -1,8 +1,10 @@
 const router = require('express').Router();
 const postController = require('../controllers/post');
 const validator = require('../middleware/validator');
+const uploadPhoto = require('../middleware/uploadPhoto');
+const processPhoto = require('../middleware/processPhoto');
 
-router.post('/add', validator.postValidation, postController.postAddPost);
+router.post('/add', uploadPhoto, processPhoto, validator.postValidation, postController.postAddPost);
 
 router.get('/view', postController.getViewMyPosts);
 

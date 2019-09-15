@@ -20,6 +20,10 @@ const userSchema = new Schema({
         type: String,
         select: false
     },
+    avatar: {
+        type: String,
+        default: 'avatar-default.jpeg'
+    },
     active: {
         type: Boolean,
         default: false,
