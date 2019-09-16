@@ -57,11 +57,11 @@ exports.getFriendsList = async (req, res, next) => {
     }
     let fetchedFriendsList = await User.findOne({ _id: req.user.id })
         .populate('friendsList');
-    const friends = [];
-    fetchedFriendsList.friendsList.forEach(friend => {
-        friends.push(friend.username);
-    })
-    res.send(friends);
+    // const friends = [];
+    // fetchedFriendsList.friendsList.forEach(friend => {
+    //     friends.push(friend.username);
+    // })
+    res.send(fetchedFriendsList.friendsList);
 }
 exports.getIncomingRequests = async (req, res, next) => {
     if (req.user.incomingFriendsRequests.length === 0) {

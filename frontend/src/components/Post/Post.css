@@ -10,6 +10,7 @@
     width: 30%;
     padding-left: 20px;
     padding-bottom: 15px;
+    text-align: center;
   }
   .Post-user {
     display: flex;
@@ -25,4 +26,8 @@
   }
   .Post-content {
     font-size: 15px;
+  }
+
+  .Post-photo {
+    margin: 10px 0 10px 0;
   }

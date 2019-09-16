@@ -169,7 +169,7 @@ exports.getSearchUsers = async (req, res, next) => {
 };
 
 exports.putSetAvatar = async (req, res, next) => {
-    if (req.user.avatar !== 'avatar-default.jpeg') {
+    if (req.user.avatar !== 'avatar-default.jpg') {
         const avatarsPath = path.join(__dirname, '..', 'public/users', req.user.avatar);
         fs.access(avatarsPath, (err) => {
             if (err) {

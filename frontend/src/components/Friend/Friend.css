@@ -1,0 +1,35 @@
+.Friend {
+    font-family: 'Roboto', sans-serif;
+    border-radius: 3px;
+    border: 1px solid #e6e6e6;
+    background-color: #fff;
+    margin: 15px;
+    width: 150px;
+    text-align: center;
+  }
+
+  .Friends-container {
+    font-family: 'Roboto', sans-serif;
+    border-radius: 3px;
+    border: 1px solid #e6e6e6;
+    background-color: #fff;
+    margin-bottom: 20px;
+    margin-left : 30%;
+    margin-right: 30%;
+    margin-top: 45px;
+    width: 40%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .Friend-name {
+    font-weight: bold;
+  }
+  
+  .test {
+    position: absolute;
+    margin-top: -22px;
+    
+    font-size: 20px;
+  }

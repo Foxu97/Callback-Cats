@@ -22,7 +22,7 @@ const userSchema = new Schema({
     },
     avatar: {
         type: String,
-        default: 'avatar-default.jpeg'
+        default: 'avatar-default.jpg'
     },
     active: {
         type: Boolean,

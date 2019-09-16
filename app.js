@@ -4,8 +4,8 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
 
-const passportConfig = require('./config/passportConfig');
 const config = require('./config/dbConfig');
+const initPassport = require('./config/passportConfig');
 const initAdmin = require('./utils/initAdmin').initAdmin;
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
@@ -19,6 +19,7 @@ const app = express();
 app.use(bodyParser.json());
 app.use(passport.initialize());
 app.use(express.static('public'))
+
 
 app.use('/user', userRouter);
 app.use('/auth', authRouter);

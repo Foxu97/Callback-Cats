@@ -11,7 +11,7 @@ export default class Home extends Component {
                     <Grid container spacing={1} alignItems="center" justify="center">
                         <Typography variant="h4" component="h1">
                             Thank you for signing up
-                    </Typography>
+                        </Typography>
                         <Typography variant="subtitle1" component="h2">
                             Verify your e-mail and <a href="/login">sign in</a> to start using ShareIt
                         </Typography>

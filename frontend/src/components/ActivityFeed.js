@@ -1,5 +1,4 @@
 import axios from 'axios';
-import Container from '@material-ui/core/Container';
 import React, { Component } from 'react';
 import Post from './Post/Post';
 
