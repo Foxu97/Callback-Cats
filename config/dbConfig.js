@@ -1,8 +1,8 @@
-module.exports = {
-    url: process.env.MONGOOSE_URL,
+// module.exports = {
+//     url: process.env.MONGOOSE_URL,
 
-    options: {
-        useNewUrlParser: true,
-        useCreateIndex: true
-    }
-};
+//     options: {
+//         useNewUrlParser: true,
+//         useCreateIndex: true
+//     }
+// };

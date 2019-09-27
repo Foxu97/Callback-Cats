@@ -31,13 +31,15 @@ exports.postRegisterUser = async (req, res, next) => {
 
     const activationLink = process.env.DOMAIN + '/user/activation/' + user.activationGUID;
     sendMail(activationLink, user.email);
-    res.status(200).send('User created successfully ' + activationLink);
+    res.status(200).send({
+        message: 'User created successfully'
+    });
 };
 
 exports.getAccountActivation = async (req, res, next) => {
     let user = await User.findOne({ activationGUID: req.params.activationGUID });
 
-    if (!user) return res.status(400).send({
+    if (!user) return res.status(401).send({
         message: 'No user with that activation ID found'
     });
 
@@ -51,16 +53,16 @@ exports.getAccountActivation = async (req, res, next) => {
 
 exports.postUserSignIn = async (req, res, next) => {
     let user = await User.findOne({ email: req.body.email }).select('+active +password');
-    if (!user) return res.status(400).send({
+    if (!user) return res.status(401).send({
         message: 'Invalid credentials'
     });
 
-    if (!user.active) return res.status(400).send({
+    if (!user.active) return res.status(401).send({
         message: 'Account has not been yet activated'
     });
 
     let result = await bcrypt.compare(req.body.password, user.password);
-    if (!result) return res.status(400).send({
+    if (!result) return res.status(401).send({
         message: 'Authentication failed'
     });
     return res.status(200).send({
@@ -118,7 +120,6 @@ exports.postResetPassword = async (req, res, next) => {
 
 exports.putUpdateProfile = async (req, res, next) => {
     if (validationHandle(req, res)) return;
-    console.log(req.body)
     let result = await User.findByIdAndUpdate(req.user._id, _.pick(req.body, ['username', 'email', 'password', 'birthdate', 'gender', 'bio', 'country', 'city']));
 
     if (!result) {
@@ -147,7 +148,9 @@ exports.deleteProfile = async (req, res, next) => {
 };
 
 exports.getViewProfile = async (req, res, next) => {
-    if (!req.params.uid) return res.status(200).send(req.user);
+    if (!req.params.uid) return res.status(200).send({
+        message: req.user
+    });
 
     let user = await User.findById(req.params.uid).select('-__v');
     if (!user) return res.status(400).send({
@@ -165,7 +168,9 @@ exports.getSearchUsers = async (req, res, next) => {
         .sort({ score: { $meta: 'textScore' } })
         .select('-__v -email -incomingFriendsRequests -sentFriendsRequests');
 
-    res.send(result);
+    res.send({
+        result: result
+    });
 };
 
 exports.putSetAvatar = async (req, res, next) => {

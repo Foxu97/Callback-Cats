@@ -42,7 +42,7 @@ exports.getViewPost = async (req, res, next) => {
             }]
     });
 
-    if (result.length === 0) res.status(400).send({
+    if (result.length === 0) res.status(401).send({
         message: 'No post has been found or you have no permission to view it'
     });
 
@@ -57,7 +57,7 @@ exports.putUpdatePost = async (req, res, next) => {
     let result = await Post.updateOne({ _id: req.params.id, createdBy: req.user._id },
         _.pick(req.body, ['title', 'description', 'privacyLevel', 'tags']));
 
-    if (result.n === 0) return res.status(400).send({
+    if (result.n === 0) return res.status(401).send({
         message: 'No post found or you have no permission to update it'
     });
 
@@ -69,7 +69,7 @@ exports.putUpdatePost = async (req, res, next) => {
 exports.deletePost = async (req, res, next) => {
     let result = await Post.deleteOne({ _id: req.params.id, createdBy: req.body._id });
 
-    if (result.n === 0) return res.status(400).send({
+    if (result.n === 0) return res.status(401).send({
         message: 'No post found or you have no permission to delete it'
     });
 
@@ -81,7 +81,7 @@ exports.deletePost = async (req, res, next) => {
 exports.getPublishPost = async (req, res, next) => {
     let result = await Post.findByIdAndUpdate({ _id: req.params.id, createdBy: req.user.id }, { state: 'published' });
 
-    if (!result) return res.status(400).send({
+    if (!result) return res.status(401).send({
         message: 'No post has been found or you have no permission to publish it'
     });
 
@@ -102,10 +102,6 @@ exports.searchPosts = async (req, res, next) => {
             }]
     });
 
-    if (result.length === 0) return res.status(400).send({
-        message: 'No posts found'
-    });
-
     res.send({
         posts: result
     });
@@ -119,10 +115,6 @@ exports.getAllPosts = async (req, res, next) => {
             { privacyLevel: 'friendsOnly', state: 'published', createdBy: { $in: req.user.friendsList } }
         ]
     }).populate('createdBy');
-
-    if (result.length === 0) return res.status(400).send({
-        message: 'No posts found'
-    });
 
     res.send({
         posts: result

@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "mocha 'test/**/*.js' || (exit 0)",
     "start": "nodemon app.js",
     "dev": "concurrently \"npm run start\" \"npm --prefix ./frontend run start\""
   },
@@ -19,12 +19,16 @@
   },
   "homepage": "https://github.com/Foxu97/Callback-Cats#readme",
   "devDependencies": {
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^6.2.0",
     "nodemon": "^1.19.1"
   },
   "dependencies": {
     "@sendgrid/mail": "^6.4.0",
     "bcrypt": "^3.0.6",
     "body-parser": "^1.19.0",
+    "config": "^3.2.2",
     "dotenv": "^8.1.0",
     "express": "^4.17.1",
     "express-validator": "^6.1.1",

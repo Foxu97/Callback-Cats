@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const passport = require('passport');
 
-const config = require('./config/dbConfig');
+const config = require('config');
 const initPassport = require('./config/passportConfig');
 const initAdmin = require('./utils/initAdmin').initAdmin;
 const userRouter = require('./routes/user');
@@ -18,7 +18,7 @@ const app = express();
 
 app.use(bodyParser.json());
 app.use(passport.initialize());
-app.use(express.static('public'))
+app.use(express.static('public'));
 
 
 app.use('/user', userRouter);
@@ -36,3 +36,5 @@ mongoose
         app.listen(9092, () => console.log('Web server listening on port 9092.'));
     })
     .catch(err => console.log(err));
+mongoose.set('useFindAndModify', false);
+module.exports = app;
